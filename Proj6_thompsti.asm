@@ -15,7 +15,23 @@ TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 
 INCLUDE Irvine32.inc
 
-; (insert macro definitions here)
+mGetString	MACRO prompt, userInput, userInputLengthAddress
+	PUSHAD
+
+	; Prompt user for signed integer number
+	MOV		EDX, prompt
+	CALL	WriteString
+
+	; Store user input
+	MOV		EDX, userInput
+	MOV		ECX, 30
+	CALL	ReadString
+
+	; Store size of user input
+	MOV		[userInputLengthAddress], EAX
+
+	POPAD
+ENDM
 
 ; (insert constant definitions here)
 
@@ -25,14 +41,23 @@ INCLUDE Irvine32.inc
 	instructions	BYTE	"Please provide 10 signed decimal integers.",13,10
 					BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
+	numberPrompt	BYTE	"Please enter a signed number: ",0
+	buffer			BYTE	30 DUP(?)
+	bufferSize		DWORD	?
 
 .code
 main PROC
 
 	; Introduce program to user and display instructions
-	PUSH OFFSET introMessage
-	PUSH OFFSET instructions
-	CALL introduction
+	PUSH	OFFSET introMessage
+	PUSH	OFFSET instructions
+	CALL	introduction
+
+	; Request signed integer number from user
+	PUSH	OFFSET numberPrompt
+	PUSH	OFFSET buffer
+	PUSH	OFFSET bufferSize
+	CALL	ReadVal
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
@@ -48,21 +73,59 @@ main ENDP
 ;		[EBP+12] = reference to introduction message.
 ; ---------------------------------------------------------------------
 introduction PROC
-	PUSH EBP
-	MOV	 EBP, ESP
+	PUSH	EBP
+	MOV		EBP, ESP
 	PUSHAD
 
 	; Display introduction to user
-	MOV	 EDX, [EBP+12]
-	CALL WriteString
+	MOV		EDX, [EBP+12]
+	CALL	WriteString
 
 	; Display program instructions to user
-	MOV	 EDX, [EBP+8]
-	CALL WriteString
+	MOV		EDX, [EBP+8]
+	CALL	WriteString
 
 	POPAD
-	POP	 EBP
-	RET	 8
+	POP		EBP
+	RET		8
 introduction ENDP
+
+; ---------------------------------------------------------------------
+; Name: ReadVal
+;
+; Obtain a signed integer number from the user, validate that it is a
+; valid signed integer number which can fit in a 32 bit register, and
+; then store the validated number in buffer. The length of the string
+; entered by the user is stored in bufferSize.
+;
+; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
+;					Both identifiers are initialized.
+;
+; Postconditions: None.
+;
+; Receives:
+;		[EBP+8] = reference to bufferSize for user input.
+;		[EBP+12] = reference to buffer for user input.
+;		[EBP+16] = reference to user prompt.
+;
+; Returns:
+;		buffer is populated with string of number input by user.
+;		bufferSize is populated with length of user inputted number.
+; ---------------------------------------------------------------------
+ReadVal PROC
+	PUSH	EBP
+	MOV		EBP, ESP
+	PUSHAD
+
+	; Get address of parameters to pass to macro
+	MOV		EDI, [EBP+8]
+
+	; Call macro to get and store number input by user
+	mGetString [EBP+16], [EBP+12], EDI
+
+	POPAD
+	POP		EBP
+	RET		12
+ReadVal ENDP
 
 END main
