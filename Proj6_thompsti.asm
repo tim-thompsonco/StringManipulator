@@ -21,16 +21,36 @@ INCLUDE Irvine32.inc
 
 .data
 
-; (insert variable definitions here)
+	intro1		BYTE	"Designing Low-Level I/O Procedures & Macros by Tim Thompson",13,10,13,10,0
 
 .code
 main PROC
 
-; (insert executable instructions here)
+	; Introduce program to user
+	PUSH OFFSET intro1
+	CALL introduction
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
 
-; (insert additional procedures here)
+; ---------------------------------------------------------------------
+; Name: introduction
+;
+; Displays an introduction message with author name to the user.
+;
+; Receives:
+;		[EBP+8] = reference to introduction message.
+; ---------------------------------------------------------------------
+introduction PROC
+	PUSH EBP
+	MOV	 EBP, ESP
+
+	; Display introduction to user
+	MOV	 EDX, [EBP+8]
+	CALL WriteString
+
+	POP	 EBP
+	RET	 8
+introduction ENDP
 
 END main
