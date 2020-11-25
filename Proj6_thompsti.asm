@@ -21,13 +21,17 @@ INCLUDE Irvine32.inc
 
 .data
 
-	intro1		BYTE	"Designing Low-Level I/O Procedures & Macros by Tim Thompson",13,10,13,10,0
+	introMessage	BYTE	"Designing Low-Level I/O Procedures & Macros by Tim Thompson",13,10,13,10,0
+	instructions	BYTE	"Please provide 10 signed decimal integers.",13,10
+					BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
+					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 
 .code
 main PROC
 
-	; Introduce program to user
-	PUSH OFFSET intro1
+	; Introduce program to user and display instructions
+	PUSH OFFSET introMessage
+	PUSH OFFSET instructions
 	CALL introduction
 
 	Invoke ExitProcess,0	; Exit to operating system
@@ -36,19 +40,27 @@ main ENDP
 ; ---------------------------------------------------------------------
 ; Name: introduction
 ;
-; Displays an introduction message with author name to the user.
+; Displays an introduction message with author name to the user and
+; then displays instructions for the user.
 ;
 ; Receives:
-;		[EBP+8] = reference to introduction message.
+;		[EBP+8] = reference to program instructions.
+;		[EBP+12] = reference to introduction message.
 ; ---------------------------------------------------------------------
 introduction PROC
 	PUSH EBP
 	MOV	 EBP, ESP
+	PUSHAD
 
 	; Display introduction to user
+	MOV	 EDX, [EBP+12]
+	CALL WriteString
+
+	; Display program instructions to user
 	MOV	 EDX, [EBP+8]
 	CALL WriteString
 
+	POPAD
 	POP	 EBP
 	RET	 8
 introduction ENDP
