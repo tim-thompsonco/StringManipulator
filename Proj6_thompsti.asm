@@ -15,7 +15,29 @@ TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 
 INCLUDE Irvine32.inc
 
-mGetString	MACRO prompt, userInput, userInputLengthAddress
+; ---------------------------------------------------------------------
+; Name: mGetString
+;
+; Prompt user to provide a signed integer number that fits inside a
+; SDWORD and then store user input as string.
+;
+; Preconditions:	Prompt is initialized and is a BYTE array containing
+;					the user prompt to display. userInput is initialized
+;					and is a BYTE array. userInputLength is initialized
+;					and is a DWORD.
+;
+; Postconditions: None.
+;
+; Receives:
+;		prompt = address of user prompt to display
+;		userInput = address of buffer array to store user input
+;		userInputLength = address of buffer size to store input length
+;
+; Returns:
+;		userInput contains string of number entered by user.
+;		userInputLength contains length of string entered by user.
+; ---------------------------------------------------------------------
+mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
 	PUSHAD
 
 	; Prompt user for signed integer number
@@ -28,7 +50,7 @@ mGetString	MACRO prompt, userInput, userInputLengthAddress
 	CALL	ReadString
 
 	; Store size of user input
-	MOV		[userInputLengthAddress], EAX
+	MOV		[userInputLength], EAX
 
 	POPAD
 ENDM

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 10:09:52
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 11:22:44
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -156,6 +156,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 10:09:52
 	   ]
  000001E0 00000000			bufferSize		DWORD	0
  000001E4 00000000			isNumberValid	DWORD	0
+ 000001E8 00000000			testNum			SDWORD	?
 
  00000000			.code
  00000000			main PROC
@@ -394,26 +395,32 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 10:09:52
  000000F1  8B 0B			MOV		ECX, [EBX]
  000000F3  8B 75 0C			MOV		ESI, [EBP+12]
 
-					; Once input is confirmed to be a valid signed number, check to see if it fits in a 32 bit register
+					; Compute number from user input string
  000000F6  FC				CLD
  000000F7			_ComputeNumber:
- 000000F7  8B 45 FC			MOV		EAX, numToCheck
- 000000FA  BA 0000000A			MOV		EDX, 10
- 000000FF  F7 E2			MUL		EDX
- 00000101  89 45 FC			MOV		numToCheck, EAX
- 00000104  AC				LODSB
- 00000105  2C 30			SUB		AL, 48
- 00000107  00 45 FC			ADD		BYTE PTR numToCheck, AL
+ 000000F7  81 05 000001E8 R		ADD		testNum, 3000000000
+	   B2D05E00
+ 00000101  8B 45 FC			MOV		EAX, numToCheck
+ 00000104  BA 0000000A			MOV		EDX, 10
+ 00000109  F7 E2			MUL		EDX
+ 0000010B  3D 7FFFFFFF			CMP		EAX, 2147483647
+ 00000110  7F 10			JG		_Test
+ 00000112  3D 80000000			CMP		EAX, -2147483648
+ 00000117  89 45 FC			MOV		numToCheck, EAX
+ 0000011A  AC				LODSB
+ 0000011B  2C 30			SUB		AL, 48
+ 0000011D  00 45 FC			ADD		BYTE PTR numToCheck, AL
 
- 0000010A  E2 EB			LOOP	_ComputeNumber
+ 00000120  E2 D5			LOOP	_ComputeNumber
 
- 0000010C  61				POPAD
- 0000010D  C9		   *	    leave  
- 0000010E  C2 000C			RET		12
- 00000111			ValidateNumber ENDP
+ 00000122			_Test:
+ 00000122  61				POPAD
+ 00000123  C9		   *	    leave  
+ 00000124  C2 000C			RET		12
+ 00000127			ValidateNumber ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 10:09:52
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 11:22:44
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -514,8 +521,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000001E8 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000111 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000001EC Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000127 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -614,9 +621,10 @@ ValidateInput  . . . . . . . . .	P Near	 000000A1 _TEXT	Length= 0000003F Public 
   _ValidationFail  . . . . . . .	L Near	 000000CD _TEXT	
   _ValidationSuccess . . . . . .	L Near	 000000D5 _TEXT	
   _ValidationDone  . . . . . . .	L Near	 000000DB _TEXT	
-ValidateNumber . . . . . . . . .	P Near	 000000E0 _TEXT	Length= 00000031 Public STDCALL
+ValidateNumber . . . . . . . . .	P Near	 000000E0 _TEXT	Length= 00000047 Public STDCALL
   numToCheck . . . . . . . . . .	DWord	 bp - 00000004
   _ComputeNumber . . . . . . . .	L Near	 000000F7 _TEXT	
+  _Test  . . . . . . . . . . . .	L Near	 00000122 _TEXT	
 WaitMsg  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBinB  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBin . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -877,6 +885,7 @@ lightRed . . . . . . . . . . . .	Number	 0000000Ch
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 numberPrompt . . . . . . . . . .	Byte	 00000133 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
+testNum  . . . . . . . . . . . .	DWord	 000001E8 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
