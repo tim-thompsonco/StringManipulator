@@ -42,6 +42,7 @@ ENDM
 					BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 	numberPrompt	BYTE	"Please enter a signed number: ",0
+	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	buffer			BYTE	30 DUP(?)
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
@@ -55,6 +56,7 @@ main PROC
 	CALL	introduction
 
 	; Request signed integer number from user
+	PUSH	OFFSET errorMessage
 	PUSH	OFFSET isNumberValid
 	PUSH	OFFSET numberPrompt
 	PUSH	OFFSET buffer
@@ -98,7 +100,9 @@ introduction ENDP
 ; Obtain a signed integer number from the user, validate that it is a
 ; valid signed integer number which can fit in a 32 bit register, and
 ; then store the validated number in buffer. The length of the string
-; entered by the user is stored in bufferSize.
+; entered by the user is stored in bufferSize. If the number is invalid
+; then another number is requested from the user, until a valid number
+; is provided.
 ;
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
 ;					Both identifiers are initialized.
@@ -111,6 +115,7 @@ introduction ENDP
 ;		[EBP+12] = reference to buffer for user input.
 ;		[EBP+16] = reference to user prompt.
 ;		[EBP+20] = reference to boolean isNumberValid.
+;		[EBP+24] = reference to error message for invalid entry.
 ;
 ; Returns:
 ;		buffer is populated with string of number input by user.
@@ -124,6 +129,8 @@ ReadVal PROC
 	; Get address of parameters to pass to macro
 	MOV			EDI, [EBP+8]
 
+_GetNumber:
+
 	; Call macro to get and store number input by user
 	mGetString	[EBP+16], [EBP+12], EDI
 
@@ -133,6 +140,17 @@ ReadVal PROC
 	PUSH		[EBP+8]
 	CALL		ValidateInput
 
+	; Check if number is valid, and if not, display error message
+	; then prompt user to enter another number
+	MOV			ESI, [EBP+20]
+	MOV			AL, [ESI]
+	CMP			AL, 1
+	JZ			_DoneReadingValue
+	MOV			EDX, [EBP+24]
+	CALL		WriteString
+	JMP			_GetNumber
+
+_DoneReadingValue:
 	POPAD
 	POP		EBP
 	RET		12
@@ -166,10 +184,23 @@ ValidateInput PROC
 	MOV		EBP, ESP
 	PUSHAD
 
+	; Store parameters for validation
+	MOV		ESI, [EBP+8]
+	MOV		EDI, [EBP+16]
 
+	; Check if buffer is an empty string, and if so, validation is done
+	MOV		AL, [ESI]
+	CMP		AL, 0
+	JZ		_ValidationDone
+
+_ValidationSuccess:
+	; If all checks pass, return isValid as 1
+	INC		DWORD PTR [EDI]
+
+_ValidationDone:
 	POPAD
 	POP		EBP
-	RET		8
+	RET		12
 ValidateInput ENDP
 
 END main
