@@ -185,17 +185,42 @@ ValidateInput PROC
 	PUSHAD
 
 	; Store parameters for validation
-	MOV		ESI, [EBP+8]
-	MOV		EDI, [EBP+16]
+	MOV		EBX, [EBP+8]
+	MOV		ECX, [EBX]
+	MOV		ESI, [EBP+12]
+	MOV		EBX, [EBP+16]
 
 	; Check if buffer is an empty string, and if so, validation is done
-	MOV		AL, [ESI]
-	CMP		AL, 0
+	CMP		ECX, 0
 	JZ		_ValidationDone
+
+	; Check if any invalid characters are in user input
+	CLD
+_CheckUserInput:
+	LODSB
+	CMP		AL, 48
+	JL		_CheckSign
+	CMP		AL, 57
+	JG		_CheckSign
+
+_CheckSignPass:
+	LOOP	_CheckUserInput
+
+	; If loop finishes and all characters are valid, validation is successful
+	JMP		_ValidationSuccess
+
+	; If ASCII character is less than 48, or greater than 58, check if it is + or -
+	; If character is + or -, continue checking user input, otherwise validation is done
+_CheckSign:
+	CMP		AL, 43
+	JZ		_CheckSignPass
+	CMP		AL, 45
+	JNZ		_ValidationDone
+	JMP		_CheckSignPass
 
 _ValidationSuccess:
 	; If all checks pass, return isValid as 1
-	INC		DWORD PTR [EDI]
+	INC		DWORD PTR [EBX]
 
 _ValidationDone:
 	POPAD

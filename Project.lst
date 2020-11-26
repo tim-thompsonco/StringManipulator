@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 07:51:16
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 08:59:49
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -212,7 +212,9 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 07:51:16
 				; Obtain a signed integer number from the user, validate that it is a
 				; valid signed integer number which can fit in a 32 bit register, and
 				; then store the validated number in buffer. The length of the string
-				; entered by the user is stored in bufferSize.
+				; entered by the user is stored in bufferSize. If the number is invalid
+				; then another number is requested from the user, until a valid number
+				; is provided.
 				;
 				; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
 				;					Both identifiers are initialized.
@@ -303,26 +305,51 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 07:51:16
  00000096  60				PUSHAD
 
 					; Store parameters for validation
- 00000097  8B 75 08			MOV		ESI, [EBP+8]
- 0000009A  8B 7D 10			MOV		EDI, [EBP+16]
+ 00000097  8B 5D 08			MOV		EBX, [EBP+8]
+ 0000009A  8B 0B			MOV		ECX, [EBX]
+ 0000009C  8B 75 0C			MOV		ESI, [EBP+12]
+ 0000009F  8B 5D 10			MOV		EBX, [EBP+16]
 
 					; Check if buffer is an empty string, and if so, validation is done
- 0000009D  8A 06			MOV		AL, [ESI]
- 0000009F  3C 00			CMP		AL, 0
- 000000A1  74 02			JZ		_ValidationDone
+ 000000A2  83 F9 00			CMP		ECX, 0
+ 000000A5  74 1A			JZ		_ValidationDone
 
- 000000A3			_ValidationSuccess:
+					; Check if any invalid characters are in user input
+ 000000A7  FC				CLD
+ 000000A8			_CheckUserInput:
+ 000000A8  AC				LODSB
+ 000000A9  3C 30			CMP		AL, 48
+ 000000AB  7C 08			JL		_CheckSign
+ 000000AD  3C 39			CMP		AL, 57
+ 000000AF  7F 04			JG		_CheckSign
+
+ 000000B1			_CheckSignPass:
+ 000000B1  E2 F5			LOOP	_CheckUserInput
+
+					; If loop finishes and all characters are valid, validation is successful
+ 000000B3  EB 0A			JMP		_ValidationSuccess
+
+					; If ASCII character is less than 48, or greater than 58, check if it is + or -
+					; If character is + or -, continue checking user input, otherwise validation is done
+ 000000B5			_CheckSign:
+ 000000B5  3C 2B			CMP		AL, 43
+ 000000B7  74 F8			JZ		_CheckSignPass
+ 000000B9  3C 2D			CMP		AL, 45
+ 000000BB  75 04			JNZ		_ValidationDone
+ 000000BD  EB F2			JMP		_CheckSignPass
+
+ 000000BF			_ValidationSuccess:
 					; If all checks pass, return isValid as 1
- 000000A3  FF 07			INC		DWORD PTR [EDI]
+ 000000BF  FF 03			INC		DWORD PTR [EBX]
 
- 000000A5			_ValidationDone:
- 000000A5  61				POPAD
- 000000A6  5D				POP		EBP
- 000000A7  C2 000C			RET		12
- 000000AA			ValidateInput ENDP
+ 000000C1			_ValidationDone:
+ 000000C1  61				POPAD
+ 000000C2  5D				POP		EBP
+ 000000C3  C2 000C			RET		12
+ 000000C6			ValidateInput ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 07:51:16
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/26/20 08:59:49
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -424,7 +451,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000001E8 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000AA Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000C6 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -516,9 +543,12 @@ Str_length . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 Str_trim . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Str_ucase  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SystemTimeToFileTime . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-ValidateInput  . . . . . . . . .	P Near	 00000093 _TEXT	Length= 00000017 Public STDCALL
-  _ValidationSuccess . . . . . .	L Near	 000000A3 _TEXT	
-  _ValidationDone  . . . . . . .	L Near	 000000A5 _TEXT	
+ValidateInput  . . . . . . . . .	P Near	 00000093 _TEXT	Length= 00000033 Public STDCALL
+  _CheckUserInput  . . . . . . .	L Near	 000000A8 _TEXT	
+  _CheckSignPass . . . . . . . .	L Near	 000000B1 _TEXT	
+  _CheckSign . . . . . . . . . .	L Near	 000000B5 _TEXT	
+  _ValidationSuccess . . . . . .	L Near	 000000BF _TEXT	
+  _ValidationDone  . . . . . . .	L Near	 000000C1 _TEXT	
 WaitMsg  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBinB  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBin . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
