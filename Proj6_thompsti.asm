@@ -98,34 +98,73 @@ introduction ENDP
 ; then store the validated number in buffer. The length of the string
 ; entered by the user is stored in bufferSize.
 ;
-; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
+; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
 ;					Both identifiers are initialized.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
-;		[EBP+8] = reference to bufferSize for user input.
+;		[EBP+8] = reference to buffer size for user input.
 ;		[EBP+12] = reference to buffer for user input.
 ;		[EBP+16] = reference to user prompt.
 ;
 ; Returns:
 ;		buffer is populated with string of number input by user.
-;		bufferSize is populated with length of user inputted number.
+;		buffer size is populated with length of user inputted number.
 ; ---------------------------------------------------------------------
 ReadVal PROC
-	PUSH	EBP
-	MOV		EBP, ESP
+	PUSH		EBP
+	MOV			EBP, ESP
 	PUSHAD
 
 	; Get address of parameters to pass to macro
-	MOV		EDI, [EBP+8]
+	MOV			EDI, [EBP+8]
 
 	; Call macro to get and store number input by user
-	mGetString [EBP+16], [EBP+12], EDI
+	mGetString	[EBP+16], [EBP+12], EDI
+
+	; Validate user input
+	PUSH		[EBP+12]
+	PUSH		[EBP+8]
+	CALL		ValidateInput
 
 	POPAD
 	POP		EBP
 	RET		12
 ReadVal ENDP
+
+; ---------------------------------------------------------------------
+; Name: ValidateInput
+;
+; Validate the user input passed into the buffer. The user input stored
+; in buffer is checked to ensure it is not an empty string, it does not
+; have non-numeric characters in it, and the number represented by the
+; string is a signed number that fits in a 32 bit register.
+;
+; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
+;					isValid is a BYTE. Buffer contains the string input
+;					by the user and buffer size contains the length of
+;					the string input by the user.
+;
+; Postconditions: None.
+;
+; Receives:
+;		[EBP+8] = reference to buffer size for user input.
+;		[EBP+12] = reference to buffer for user input.
+;		[?] = reference to isValid boolean.
+;
+; Returns:
+;		isValid as 1 if input is valid, 0 if input is invalid.
+; ---------------------------------------------------------------------
+ValidateInput PROC
+	PUSH	EBP
+	MOV		EBP, ESP
+	PUSHAD
+
+
+	POPAD
+	POP		EBP
+	RET		8
+ValidateInput ENDP
 
 END main

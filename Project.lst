@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/25/20 16:19:07
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/25/20 17:43:50
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -188,30 +188,30 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/25/20 16:19:07
 				; then store the validated number in buffer. The length of the string
 				; entered by the user is stored in bufferSize.
 				;
-				; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
+				; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
 				;					Both identifiers are initialized.
 				;
 				; Postconditions: None.
 				;
 				; Receives:
-				;		[EBP+8] = reference to bufferSize for user input.
+				;		[EBP+8] = reference to buffer size for user input.
 				;		[EBP+12] = reference to buffer for user input.
 				;		[EBP+16] = reference to user prompt.
 				;
 				; Returns:
 				;		buffer is populated with string of number input by user.
-				;		bufferSize is populated with length of user inputted number.
+				;		buffer size is populated with length of user inputted number.
 				; ---------------------------------------------------------------------
  00000043			ReadVal PROC
- 00000043  55				PUSH	EBP
- 00000044  8B EC			MOV		EBP, ESP
+ 00000043  55				PUSH		EBP
+ 00000044  8B EC			MOV			EBP, ESP
  00000046  60				PUSHAD
 
 					; Get address of parameters to pass to macro
- 00000047  8B 7D 08			MOV		EDI, [EBP+8]
+ 00000047  8B 7D 08			MOV			EDI, [EBP+8]
 
 					; Call macro to get and store number input by user
-					mGetString [EBP+16], [EBP+12], EDI
+					mGetString	[EBP+16], [EBP+12], EDI
  0000004A  60		     1		PUSHAD
  0000004B  8B 55 10	     1		MOV		EDX, [EBP+16]
  0000004E  E8 00000000 E     1		CALL	WriteString
@@ -221,13 +221,52 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/25/20 16:19:07
  00000060  89 07	     1		MOV		[EDI], EAX
  00000062  61		     1		POPAD
 
- 00000063  61				POPAD
- 00000064  5D				POP		EBP
- 00000065  C2 000C			RET		12
- 00000068			ReadVal ENDP
+					; Validate user input
+ 00000063  FF 75 0C			PUSH		[EBP+12]
+ 00000066  FF 75 08			PUSH		[EBP+8]
+ 00000069  E8 00000005			CALL		ValidateInput
+
+ 0000006E  61				POPAD
+ 0000006F  5D				POP		EBP
+ 00000070  C2 000C			RET		12
+ 00000073			ReadVal ENDP
+
+				; ---------------------------------------------------------------------
+				; Name: ValidateInput
+				;
+				; Validate the user input passed into the buffer. The user input stored
+				; in buffer is checked to ensure it is not an empty string, it does not
+				; have non-numeric characters in it, and the number represented by the
+				; string is a signed number that fits in a 32 bit register.
+				;
+				; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
+				;					isValid is a BYTE. Buffer contains the string input
+				;					by the user and buffer size contains the length of
+				;					the string input by the user.
+				;
+				; Postconditions: None.
+				;
+				; Receives:
+				;		[EBP+8] = reference to buffer size for user input.
+				;		[EBP+12] = reference to buffer for user input.
+				;		[?] = reference to isValid boolean.
+				;
+				; Returns:
+				;		isValid as 1 if input is valid, 0 if input is invalid.
+				; ---------------------------------------------------------------------
+ 00000073			ValidateInput PROC
+ 00000073  55				PUSH	EBP
+ 00000074  8B EC			MOV		EBP, ESP
+ 00000076  60				PUSHAD
+
+
+ 00000077  61				POPAD
+ 00000078  5D				POP		EBP
+ 00000079  C2 0008			RET		8
+ 0000007C			ValidateInput ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/25/20 16:19:07
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/25/20 17:43:50
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -329,7 +368,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000174 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000068 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000007C Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -399,7 +438,7 @@ ReadInt  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ReadKeyFlush . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadKey  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadString . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-ReadVal  . . . . . . . . . . . .	P Near	 00000043 _TEXT	Length= 00000025 Public STDCALL
+ReadVal  . . . . . . . . . . . .	P Near	 00000043 _TEXT	Length= 00000030 Public STDCALL
 SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -419,6 +458,7 @@ Str_length . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 Str_trim . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Str_ucase  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SystemTimeToFileTime . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+ValidateInput  . . . . . . . . .	P Near	 00000073 _TEXT	Length= 00000009 Public STDCALL
 WaitMsg  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBinB  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBin . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
