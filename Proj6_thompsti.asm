@@ -134,11 +134,17 @@ _GetNumber:
 	; Call macro to get and store number input by user
 	mGetString	[EBP+16], [EBP+12], EDI
 
-	; Validate user input
+	; Validate user input to ensure it is not empty and is a number
 	PUSH		[EBP+20]
 	PUSH		[EBP+12]
 	PUSH		[EBP+8]
 	CALL		ValidateInput
+
+	; Validate number to ensure it fits in the boundaries of a SDWORD
+	PUSH		[EBP+20]
+	PUSH		[EBP+12]
+	PUSH		[EBP+8]
+	CALL		ValidateNumber
 
 	; Check if number is valid, and if not, display error message
 	; then prompt user to enter another number
@@ -160,9 +166,8 @@ ReadVal ENDP
 ; Name: ValidateInput
 ;
 ; Validate the user input passed into the buffer. The user input stored
-; in buffer is checked to ensure it is not an empty string, it does not
-; have non-numeric characters in it, and the number represented by the
-; string is a signed number that fits in a 32 bit register.
+; in buffer is checked to ensure it is not an empty string and it does
+; not have non-numeric characters in it.
 ;
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
 ;					isValid is a BYTE. Buffer contains the string input
@@ -192,7 +197,7 @@ ValidateInput PROC
 
 	; Check if buffer is an empty string, and if so, validation is done
 	CMP		ECX, 0
-	JZ		_ValidationDone
+	JZ		_ValidationFail
 
 	; Check if any invalid characters are in user input
 	CLD
@@ -215,17 +220,71 @@ _CheckSign:
 	CMP		AL, 43
 	JZ		_CheckSignPass
 	CMP		AL, 45
-	JNZ		_ValidationDone
+	JNZ		_ValidationFail
 	JMP		_CheckSignPass
+
+_ValidationFail:
+	; If any checks fail, return isValid as 0
+	MOV		DWORD PTR [EBX], 0
+	JMP		_ValidationDone
 
 _ValidationSuccess:
 	; If all checks pass, return isValid as 1
-	INC		DWORD PTR [EBX]
+	MOV		DWORD PTR [EBX], 1
 
 _ValidationDone:
 	POPAD
 	POP		EBP
 	RET		12
 ValidateInput ENDP
+
+; ---------------------------------------------------------------------
+; Name: ValidateNumber
+;
+; Validate the number entered by the user to ensure that it fits inside
+; the min/max of a SDWORD, so that it is capable of fitting inside a
+; 32 bit register.
+;
+; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
+;					isValid is a BYTE. Buffer contains the string input
+;					by the user and buffer size contains the length of
+;					the string input by the user.
+;
+; Postconditions: None.
+;
+; Receives:
+;		[EBP+8] = reference to buffer size for user input.
+;		[EBP+12] = reference to buffer for user input.
+;		[EBP+16] = reference to isValid boolean.
+;
+; Returns:
+;		isValid as 1 if input is valid, 0 if input is invalid.
+; ---------------------------------------------------------------------
+ValidateNumber PROC
+	LOCAL	numToCheck:SDWORD
+	MOV		numToCheck, 0
+	PUSHAD
+
+	; Store parameters for validation
+	MOV		EBX, [EBP+8]
+	MOV		ECX, [EBX]
+	MOV		ESI, [EBP+12]
+
+	; Compute number from user input string
+	CLD
+_ComputeNumber:
+	MOV		EAX, numToCheck
+	MOV		EDX, 10
+	MUL		EDX
+	MOV		numToCheck, EAX
+	LODSB
+	SUB		AL, 48
+	ADD		BYTE PTR numToCheck, AL
+
+	LOOP	_ComputeNumber
+
+	POPAD
+	RET		12
+ValidateNumber ENDP
 
 END main
