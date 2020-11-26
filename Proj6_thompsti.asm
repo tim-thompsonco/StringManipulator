@@ -43,7 +43,8 @@ ENDM
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 	numberPrompt	BYTE	"Please enter a signed number: ",0
 	buffer			BYTE	30 DUP(?)
-	bufferSize		DWORD	?
+	bufferSize		DWORD	0
+	isNumberValid	DWORD	0
 
 .code
 main PROC
@@ -54,6 +55,7 @@ main PROC
 	CALL	introduction
 
 	; Request signed integer number from user
+	PUSH	OFFSET isNumberValid
 	PUSH	OFFSET numberPrompt
 	PUSH	OFFSET buffer
 	PUSH	OFFSET bufferSize
@@ -101,12 +103,14 @@ introduction ENDP
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
 ;					Both identifiers are initialized.
 ;
-; Postconditions: None.
+; Postconditions:	isNumberValid contains a 1 if the number entered
+;					by the user is valid, 0 if the number is invalid.
 ;
 ; Receives:
 ;		[EBP+8] = reference to buffer size for user input.
 ;		[EBP+12] = reference to buffer for user input.
 ;		[EBP+16] = reference to user prompt.
+;		[EBP+20] = reference to boolean isNumberValid.
 ;
 ; Returns:
 ;		buffer is populated with string of number input by user.
@@ -124,6 +128,7 @@ ReadVal PROC
 	mGetString	[EBP+16], [EBP+12], EDI
 
 	; Validate user input
+	PUSH		[EBP+20]
 	PUSH		[EBP+12]
 	PUSH		[EBP+8]
 	CALL		ValidateInput
@@ -151,7 +156,7 @@ ReadVal ENDP
 ; Receives:
 ;		[EBP+8] = reference to buffer size for user input.
 ;		[EBP+12] = reference to buffer for user input.
-;		[?] = reference to isValid boolean.
+;		[EBP+16] = reference to isValid boolean.
 ;
 ; Returns:
 ;		isValid as 1 if input is valid, 0 if input is invalid.
