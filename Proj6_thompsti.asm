@@ -177,6 +177,17 @@ _GetNumber:
 	PUSH		[EBP+8]
 	CALL		ValidateInput
 
+	; Check if user input is a number, and if not, display error message
+	; then prompt user to enter a number
+	MOV			ESI, [EBP+20]
+	MOV			AL, [ESI]
+	CMP			AL, 1
+	JZ			_CheckNumberSize
+	MOV			EDX, [EBP+24]
+	CALL		WriteString
+	JMP			_GetNumber
+
+_CheckNumberSize:
 	; Validate number to ensure it fits in the boundaries of a SDWORD
 	PUSH		[EBP+36]
 	PUSH		[EBP+32]
