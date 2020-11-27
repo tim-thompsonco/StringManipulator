@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 16:13:00
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 16:17:40
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -306,12 +306,12 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 16:13:00
 	   72 79 20 61 67
 	   61 69 6E 2E 0D
 	   0A 00
- 000001FF  0000001E [			buffer			BYTE	30 DUP(?)
+ 000001FF  0000000B [			buffer			BYTE	11 DUP(?)
 	    00
 	   ]
- 0000021D 00000000			bufferSize		DWORD	0
- 00000221 00000000			isNumberValid	DWORD	0
- 00000225  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
+ 0000020A 00000000			bufferSize		DWORD	0
+ 0000020E 00000000			isNumberValid	DWORD	0
+ 00000212  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
 
@@ -337,16 +337,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 16:13:00
  00000023  2B C3	     1		SUB		EAX, EBX
  00000025  BB 00000004	     1		MOV		EBX, 4
  0000002A  F7 E3	     1		MUL		EBX
- 0000002C  BE 00000225 R     1		MOV		ESI, OFFSET validatedNums
+ 0000002C  BE 00000212 R     1		MOV		ESI, OFFSET validatedNums
  00000031  03 F0	     1		ADD		ESI, EAX
  00000033  56		     1		PUSH	ESI
  00000034  68 80000000	     1		PUSH	MINVALIDVAL
  00000039  68 7FFFFFFF	     1		PUSH	MAXVALIDVAL
  0000003E  68 0000018F R     1		PUSH	OFFSET errorMessage
- 00000043  68 00000221 R     1		PUSH	OFFSET isNumberValid
+ 00000043  68 0000020E R     1		PUSH	OFFSET isNumberValid
  00000048  68 00000170 R     1		PUSH	OFFSET numberPrompt
  0000004D  68 000001FF R     1		PUSH	OFFSET buffer
- 00000052  68 0000021D R     1		PUSH	OFFSET bufferSize
+ 00000052  68 0000020A R     1		PUSH	OFFSET bufferSize
  00000057  E8 00000016	     1		CALL	ReadVal
  0000005C  E2 BE	     1		LOOP _GetValue
  0000005E  61		     1		POPAD
@@ -699,7 +699,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 16:13:00
  000001A5			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 16:13:00
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 16:17:40
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -804,7 +804,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000024D Para	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000023A Para	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 000001A5 Para	  Public  'CODE'	
 
 
@@ -1161,7 +1161,7 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bufferSize . . . . . . . . . . .	DWord	 0000021D _DATA	
+bufferSize . . . . . . . . . . .	DWord	 0000020A _DATA	
 buffer . . . . . . . . . . . . .	Byte	 000001FF _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 errorMessage . . . . . . . . . .	Byte	 0000018F _DATA	
@@ -1171,7 +1171,7 @@ gray . . . . . . . . . . . . . .	Number	 00000008h
 green  . . . . . . . . . . . . .	Number	 00000002h   
 instructions . . . . . . . . . .	Byte	 0000007D _DATA	
 introMessage . . . . . . . . . .	Byte	 00000000 _DATA	
-isNumberValid  . . . . . . . . .	DWord	 00000221 _DATA	
+isNumberValid  . . . . . . . . .	DWord	 0000020E _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -1181,7 +1181,7 @@ lightRed . . . . . . . . . . . .	Number	 0000000Ch
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 numberPrompt . . . . . . . . . .	Byte	 00000170 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-validatedNums  . . . . . . . . .	DWord	 00000225 _DATA	
+validatedNums  . . . . . . . . .	DWord	 00000212 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   

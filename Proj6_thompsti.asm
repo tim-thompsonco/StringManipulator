@@ -186,7 +186,7 @@ ENDM
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 	numberPrompt	BYTE	"Please enter a signed number: ",0
 	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
-	buffer			BYTE	30 DUP(?)
+	buffer			BYTE	11 DUP(?)
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
 	validatedNums	SDWORD	NUMCOUNT DUP(?)
