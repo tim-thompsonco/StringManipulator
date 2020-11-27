@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 11:33:49
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 13:19:01
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -510,38 +510,37 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 11:33:49
  00000170			_CheckMaxLimit:
 					; Check if number is above maximum value
  00000170  3B 45 14			CMP		EAX, [EBP+20]
- 00000173  70 1E			JO		_NumberInvalid
- 00000175  EB 0C			JMP		_NumberValid
+ 00000173  70 19			JO		_NumberInvalid
+ 00000175  EB 07			JMP		_NumberValid
 
  00000177			_CheckMinLimit:
 					; Check if negative number is below minimum value
- 00000177  BB FFFFFFFF			MOV		EBX, -1
- 0000017C  F7 E3			MUL		EBX
- 0000017E  3B 45 18			CMP		EAX, [EBP+24]
- 00000181  70 10			JO		_NumberInvalid
+ 00000177  F7 D8			NEG		EAX
+ 00000179  3B 45 18			CMP		EAX, [EBP+24]
+ 0000017C  70 10			JO		_NumberInvalid
 
- 00000183			_NumberValid:
+ 0000017E			_NumberValid:
 					; Number is within SDWORD bounds, return isValid as 1
- 00000183  8B 5D 10			MOV		EBX, [EBP+16]
- 00000186  C7 03 00000001		MOV		DWORD PTR [EBX], 1
+ 0000017E  8B 5D 10			MOV		EBX, [EBP+16]
+ 00000181  C7 03 00000001		MOV		DWORD PTR [EBX], 1
 
 					; Store number now that it is validated
- 0000018C  FC				CLD
- 0000018D  8B 7D 1C			MOV		EDI, [EBP+28]
- 00000190  AB				STOSD
+ 00000187  FC				CLD
+ 00000188  8B 7D 1C			MOV		EDI, [EBP+28]
+ 0000018B  AB				STOSD
 
- 00000191  EB 09			JMP		_ValidationComplete
+ 0000018C  EB 09			JMP		_ValidationComplete
 
- 00000193			_NumberInvalid:
+ 0000018E			_NumberInvalid:
 					; Number is outside SDWORD bounds, return isValid as 0
- 00000193  8B 5D 10			MOV		EBX, [EBP+16]
- 00000196  C7 03 00000000		MOV		DWORD PTR [EBX], 0
+ 0000018E  8B 5D 10			MOV		EBX, [EBP+16]
+ 00000191  C7 03 00000000		MOV		DWORD PTR [EBX], 0
 
- 0000019C			_ValidationComplete:
- 0000019C  61				POPAD
- 0000019D  C9		   *	    leave  
- 0000019E  C2 0018			RET		24
- 000001A1			ValidateNumber ENDP
+ 00000197			_ValidationComplete:
+ 00000197  61				POPAD
+ 00000198  C9		   *	    leave  
+ 00000199  C2 0018			RET		24
+ 0000019C			ValidateNumber ENDP
 
 				; ---------------------------------------------------------------------
 				; Name: WriteVal
@@ -563,10 +562,10 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 11:33:49
 				;
 				; Returns: None.
 				; ---------------------------------------------------------------------
- 000001A1			WriteVal PROC
- 000001A1  55				PUSH		EBP
- 000001A2  8B EC			MOV			EBP, ESP
- 000001A4  60				PUSHAD
+ 0000019C			WriteVal PROC
+ 0000019C  55				PUSH		EBP
+ 0000019D  8B EC			MOV			EBP, ESP
+ 0000019F  60				PUSHAD
 
 					; To get string of ascii digits, use / 10 trick to strip off
 					; the last digit of number and store in buffer, increment
@@ -575,13 +574,13 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 11:33:49
 					; to end of reverse number and walk backwards through array
 					; to print correctly.
 					
- 000001A5  61				POPAD
- 000001A6  5D				POP		EBP
- 000001A7  C2 000C			RET		12
- 000001AA			WriteVal ENDP
+ 000001A0  61				POPAD
+ 000001A1  5D				POP		EBP
+ 000001A2  C2 000C			RET		12
+ 000001A5			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 11:33:49
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 13:19:01
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -683,7 +682,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000210 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001AA Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001A5 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -783,7 +782,7 @@ ValidateInput  . . . . . . . . .	P Near	 000000E6 _TEXT	Length= 0000003F Public 
   _ValidationFail  . . . . . . .	L Near	 00000112 _TEXT	
   _ValidationSuccess . . . . . .	L Near	 0000011A _TEXT	
   _ValidationDone  . . . . . . .	L Near	 00000120 _TEXT	
-ValidateNumber . . . . . . . . .	P Near	 00000125 _TEXT	Length= 0000007C Public STDCALL
+ValidateNumber . . . . . . . . .	P Near	 00000125 _TEXT	Length= 00000077 Public STDCALL
   numIsNegative  . . . . . . . .	Byte	 bp - 00000001
   _PositiveSign  . . . . . . . .	L Near	 00000144 _TEXT	
   _NegativeSign  . . . . . . . .	L Near	 0000014A _TEXT	
@@ -791,9 +790,9 @@ ValidateNumber . . . . . . . . .	P Near	 00000125 _TEXT	Length= 0000007C Public 
   _ComputeNumber . . . . . . . .	L Near	 00000157 _TEXT	
   _CheckMaxLimit . . . . . . . .	L Near	 00000170 _TEXT	
   _CheckMinLimit . . . . . . . .	L Near	 00000177 _TEXT	
-  _NumberValid . . . . . . . . .	L Near	 00000183 _TEXT	
-  _NumberInvalid . . . . . . . .	L Near	 00000193 _TEXT	
-  _ValidationComplete  . . . . .	L Near	 0000019C _TEXT	
+  _NumberValid . . . . . . . . .	L Near	 0000017E _TEXT	
+  _NumberInvalid . . . . . . . .	L Near	 0000018E _TEXT	
+  _ValidationComplete  . . . . .	L Near	 00000197 _TEXT	
 WaitMsg  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBinB  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteBin . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -811,7 +810,7 @@ WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteVal . . . . . . . . . . . .	P Near	 000001A1 _TEXT	Length= 00000009 Public STDCALL
+WriteVal . . . . . . . . . . . .	P Near	 0000019C _TEXT	Length= 00000009 Public STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 introduction . . . . . . . . . .	P Near	 0000005D _TEXT	Length= 00000019 Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000005D Public STDCALL

@@ -390,8 +390,7 @@ _CheckMaxLimit:
 
 _CheckMinLimit:
 	; Check if negative number is below minimum value
-	MOV		EBX, -1
-	MUL		EBX
+	NEG		EAX
 	CMP		EAX, [EBP+24]
 	JO		_NumberInvalid
 
