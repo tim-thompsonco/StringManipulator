@@ -80,6 +80,24 @@ mShowIntroduction	MACRO introMessage:REQ, instructions:REQ
 ENDM
 
 ; ---------------------------------------------------------------------
+; Name: mShowGoodbye
+;
+; Displays a goodbye message to the user.
+;
+; Receives:
+;		goodbyeMessage = reference to address of goodbye message.
+; ---------------------------------------------------------------------
+mShowGoodbye	MACRO goodbyeMessage:REQ
+	PUSH	EDX
+
+	; Display goodbye message to user
+	MOV		EDX, OFFSET goodbyeMessage
+	CALL	WriteString
+
+	POP		EDX
+ENDM
+
+; ---------------------------------------------------------------------
 ; Name: mShowErrorMessage
 ;
 ; Displays an error message to the console.
@@ -162,6 +180,7 @@ ENDM
 .data
 
 	introMessage	BYTE	"Designing Low-Level I/O Procedures & Macros by Tim Thompson",13,10,13,10,0
+	goodbyeMessage	BYTE	13,10,"So long and thanks for all the knowledge! Wonderful class.",0
 	instructions	BYTE	"Please provide 10 signed decimal integers.",13,10
 					BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
@@ -180,6 +199,9 @@ main PROC
 
 	; Obtain values from user
 	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize
+
+	; Say goodbye to the user
+	mShowGoodbye goodbyeMessage
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
