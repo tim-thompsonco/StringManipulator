@@ -57,6 +57,7 @@ ENDM
 
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
+	NUMCOUNT = 10
 
 .data
 
@@ -69,6 +70,7 @@ ENDM
 	buffer			BYTE	30 DUP(?)
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
+	validatedNums	SDWORD	NUMCOUNT DUP(?)
 
 .code
 main PROC
@@ -79,6 +81,7 @@ main PROC
 	CALL	introduction
 
 	; Request signed integer number from user
+	PUSH	OFFSET validatedNums
 	PUSH	MINVALIDVAL
 	PUSH	MAXVALIDVAL
 	PUSH	OFFSET errorMessage
@@ -135,6 +138,8 @@ introduction ENDP
 ;					containing an error message to display to user
 ;					if the number is invalid. Max and min valid values
 ;					are	initialized to SDWORD upper and lower boundaries.
+;					validatedNums is a SDWORD array, initialized, and
+;					has capacity to accept another number.
 ;
 ; Postconditions:	isNumberValid contains a 1 if the number entered
 ;					by the user is valid, 0 if the number is invalid.
@@ -147,10 +152,12 @@ introduction ENDP
 ;		[EBP+24] = reference to error message for invalid entry.
 ;		[EBP+28] = reference to max valid value for number.
 ;		[EBP+32] = reference to min valid value for number.
+;		[EBP+36] = reference to array to store validated numbers.
 ;
 ; Returns:
 ;		buffer is populated with string of number input by user.
 ;		buffer size is populated with length of user inputted number.
+;		validatedNums array contains number input by user.
 ; ---------------------------------------------------------------------
 ReadVal PROC
 	PUSH		EBP
@@ -161,7 +168,6 @@ ReadVal PROC
 	MOV			EDI, [EBP+8]
 
 _GetNumber:
-
 	; Call macro to get and store number input by user
 	mGetString	[EBP+16], [EBP+12], EDI
 
@@ -172,6 +178,7 @@ _GetNumber:
 	CALL		ValidateInput
 
 	; Validate number to ensure it fits in the boundaries of a SDWORD
+	PUSH		[EBP+36]
 	PUSH		[EBP+32]
 	PUSH		[EBP+28]
 	PUSH		[EBP+20]
@@ -190,10 +197,9 @@ _GetNumber:
 	JMP			_GetNumber
 
 _DoneReadingValue:
-
 	POPAD
 	POP		EBP
-	RET		28
+	RET		32
 ReadVal ENDP
 
 ; ---------------------------------------------------------------------
@@ -267,7 +273,6 @@ _ValidationSuccess:
 	MOV		DWORD PTR [EBX], 1
 
 _ValidationDone:
-
 	POPAD
 	POP		EBP
 	RET		12
@@ -287,7 +292,7 @@ ValidateInput ENDP
 ;					buffer size contains the length of the string input
 ;					by the user.
 ;
-; Postconditions: None.
+; Postconditions: Buffer is
 ;
 ; Receives:
 ;		[EBP+8] = reference to buffer size for user input.
@@ -295,6 +300,7 @@ ValidateInput ENDP
 ;		[EBP+16] = reference to isValid boolean.
 ;		[EBP+20] = reference to max valid value for number.
 ;		[EBP+24] = reference to min valid value for number.
+;		[EBP+28] = reference to array to store validated numbers.
 ;
 ; Returns:
 ;		isValid as 1 if input is valid, 0 if input is invalid.
@@ -365,20 +371,25 @@ _CheckMinLimit:
 	JO		_NumberInvalid
 
 _NumberValid:
-	; If number is within SDWORD bounds, return isValid as 1
+	; Number is within SDWORD bounds, return isValid as 1
 	MOV		EBX, [EBP+16]
 	MOV		DWORD PTR [EBX], 1
+
+	; Store number now that it is validated
+	CLD
+	MOV		EDI, [EBP+28]
+	STOSD
+
 	JMP		_ValidationComplete
 
 _NumberInvalid:
-	; If number is outside SDWORD bounds, return isValid as 0
+	; Number is outside SDWORD bounds, return isValid as 0
 	MOV		EBX, [EBP+16]
 	MOV		DWORD PTR [EBX], 0
 
 _ValidationComplete:
-
 	POPAD
-	RET		20
+	RET		24
 ValidateNumber ENDP
 
 END main
