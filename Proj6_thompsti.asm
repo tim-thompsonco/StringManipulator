@@ -303,7 +303,7 @@ ValidateInput ENDP
 ;					buffer size contains the length of the string input
 ;					by the user.
 ;
-; Postconditions: Buffer is
+; Postconditions: validatedNums array contains number if valid.
 ;
 ; Receives:
 ;		[EBP+8] = reference to buffer size for user input.
@@ -402,5 +402,42 @@ _ValidationComplete:
 	POPAD
 	RET		24
 ValidateNumber ENDP
+
+; ---------------------------------------------------------------------
+; Name: WriteVal
+;
+; Convert a numeric value into a string of ASCII digits and then display
+; the value to the console.
+;
+; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
+;					Number is a SDWORD. All three identifiers are
+;					initialized and number is validated.
+;
+; Postconditions:	Buffer contains reversed number. Buffer size contains
+;					length of number.
+;
+; Receives:
+;		[EBP+8] = reference to address of buffer size for user input.
+;		[EBP+12] = reference to address of buffer for user input.
+;		[EBP+16] = reference to value of number.
+;
+; Returns: None.
+; ---------------------------------------------------------------------
+WriteVal PROC
+	PUSH		EBP
+	MOV			EBP, ESP
+	PUSHAD
+
+	; To get string of ascii digits, use / 10 trick to strip off
+	; the last digit of number and store in buffer, increment
+	; buffer size as you do, and once done the number will be in
+	; buffer in reverse. Should be able to use buffer size to get
+	; to end of reverse number and walk backwards through array
+	; to print correctly.
+	
+	POPAD
+	POP		EBP
+	RET		12
+WriteVal ENDP
 
 END main
