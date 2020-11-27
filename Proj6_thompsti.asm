@@ -96,6 +96,65 @@ mShowErrorMessage	MACRO errorMessage:REQ
 	POP		EDX
 ENDM
 
+; ---------------------------------------------------------------------
+; Name: mGetValues
+;
+; Get 10 signed integer numbers from user which fit inside a SDWORD and
+; populate an array with the validated numbers.
+;
+; Preconditions:	Prompt is initialized and is a BYTE array containing
+;					the user prompt to display. userInput is initialized
+;					and is a BYTE array. userInputLength is initialized
+;					and is a DWORD.
+;
+; Postconditions: None.
+;
+; Receives:
+;		numsToGet = reference to constant value of numbers to read in.
+;		numArr = reference to address of array to store validated numbers.
+;		minVal = reference to constant value of min valid value for number.
+;		maxVal = reference to constant value max valid value for number.
+;		errorMsg = reference to address of error message for invalid entry.
+;		isNumValid = reference to address of boolean isNumberValid.
+;		numPrompt = reference to address of user prompt.
+;		inputBuffer = reference to address of buffer to store user input.
+;		inputBufferSize = reference to address to store length of user input.
+;
+; Returns:
+;		buffer is populated with string of number input by user.
+;		buffer size is populated with length of user inputted number.
+;		numArr contains validated numbers input by user.
+; ---------------------------------------------------------------------
+mGetValues	MACRO numsToGet:REQ, numArr:REQ, minVal:REQ, maxVal:REQ, errorMsg:REQ, isNumValid:REQ, numPrompt:REQ, inputBuffer:REQ, inputBufferSize:REQ
+	PUSHAD
+
+	MOV		ECX, numsToGet
+_GetValue:
+	; Get first address of numArr that is empty to store number in
+	MOV		EAX, numsToGet
+	MOV		EBX, ECX
+	SUB		EAX, EBX
+	MOV		EBX, 4
+	MUL		EBX
+	MOV		ESI, OFFSET numArr
+	ADD		ESI, EAX
+
+	; Request signed integer number from user
+	PUSH	ESI
+	PUSH	minVal
+	PUSH	maxVal
+	PUSH	OFFSET errorMsg
+	PUSH	OFFSET isNumValid
+	PUSH	OFFSET numPrompt
+	PUSH	OFFSET inputBuffer
+	PUSH	OFFSET inputBufferSize
+	CALL	ReadVal
+
+	LOOP _GetValue
+
+	POPAD
+ENDM
+
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
@@ -120,29 +179,7 @@ main PROC
 	mShowIntroduction OFFSET introMessage, OFFSET instructions
 
 	; Obtain values from user
-	MOV		ECX, NUMCOUNT
-_GetValue:
-	; Get first address of validatedNums that is empty to store number in
-	MOV		EAX, NUMCOUNT
-	MOV		EBX, ECX
-	SUB		EAX, EBX
-	MOV		EBX, 4
-	MUL		EBX
-	MOV		ESI, OFFSET validatedNums
-	ADD		ESI, EAX
-
-	; Request signed integer number from user
-	PUSH	ESI
-	PUSH	MINVALIDVAL
-	PUSH	MAXVALIDVAL
-	PUSH	OFFSET errorMessage
-	PUSH	OFFSET isNumberValid
-	PUSH	OFFSET numberPrompt
-	PUSH	OFFSET buffer
-	PUSH	OFFSET bufferSize
-	CALL	ReadVal
-
-	LOOP _GetValue
+	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
