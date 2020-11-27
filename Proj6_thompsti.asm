@@ -1,7 +1,7 @@
 TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 
 ; Author: Tim Thompson
-; Last Modified: 11/25/20
+; Last Modified: 11/27/20
 ; OSU email address: thompsti@oregonstate.edu
 ; Course number/section:   CS271 Section 400
 ; Project Number:       6         Due Date: 12/6/20
@@ -55,6 +55,30 @@ mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
 	POPAD
 ENDM
 
+; ---------------------------------------------------------------------
+; Name: mShowIntroduction
+;
+; Displays an introduction message with author name to the user and
+; then displays instructions for the user.
+;
+; Receives:
+;		introMessage = reference to address of introduction message.
+;		instructions = reference to address of program instructions.
+; ---------------------------------------------------------------------
+mShowIntroduction	MACRO introMessage:REQ, instructions:REQ
+	PUSH	EDX
+
+	; Display introduction to user
+	MOV		EDX, introMessage
+	CALL	WriteString
+
+	; Display program instructions to user
+	MOV		EDX, instructions
+	CALL	WriteString
+
+	POP		EDX
+ENDM
+
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
@@ -76,9 +100,7 @@ ENDM
 main PROC
 
 	; Introduce program to user and display instructions
-	PUSH	OFFSET introMessage
-	PUSH	OFFSET instructions
-	CALL	introduction
+	mShowIntroduction OFFSET introMessage, OFFSET instructions
 
 	; Obtain values from user
 	MOV		ECX, NUMCOUNT
@@ -107,34 +129,6 @@ _GetValue:
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
-
-; ---------------------------------------------------------------------
-; Name: introduction
-;
-; Displays an introduction message with author name to the user and
-; then displays instructions for the user.
-;
-; Receives:
-;		[EBP+8] = reference to program instructions.
-;		[EBP+12] = reference to introduction message.
-; ---------------------------------------------------------------------
-introduction PROC
-	PUSH	EBP
-	MOV		EBP, ESP
-	PUSHAD
-
-	; Display introduction to user
-	MOV		EDX, [EBP+12]
-	CALL	WriteString
-
-	; Display program instructions to user
-	MOV		EDX, [EBP+8]
-	CALL	WriteString
-
-	POPAD
-	POP		EBP
-	RET		8
-introduction ENDP
 
 ; ---------------------------------------------------------------------
 ; Name: ReadVal
