@@ -55,7 +55,8 @@ mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
 	POPAD
 ENDM
 
-; (insert constant definitions here)
+	MINVALIDVAL = -2147483648
+	MAXVALIDVAL = 2147483647
 
 .data
 
@@ -78,6 +79,8 @@ main PROC
 	CALL	introduction
 
 	; Request signed integer number from user
+	PUSH	MINVALIDVAL
+	PUSH	MAXVALIDVAL
 	PUSH	OFFSET errorMessage
 	PUSH	OFFSET isNumberValid
 	PUSH	OFFSET numberPrompt
@@ -127,7 +130,11 @@ introduction ENDP
 ; is provided.
 ;
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
-;					Both identifiers are initialized.
+;					User prompt is a BYTE array containing prompt to
+;					display to user. errorMessage is a BYTE array
+;					containing an error message to display to user
+;					if the number is invalid. Max and min valid values
+;					are	initialized to SDWORD upper and lower boundaries.
 ;
 ; Postconditions:	isNumberValid contains a 1 if the number entered
 ;					by the user is valid, 0 if the number is invalid.
@@ -138,6 +145,8 @@ introduction ENDP
 ;		[EBP+16] = reference to user prompt.
 ;		[EBP+20] = reference to boolean isNumberValid.
 ;		[EBP+24] = reference to error message for invalid entry.
+;		[EBP+28] = reference to max valid value for number.
+;		[EBP+32] = reference to min valid value for number.
 ;
 ; Returns:
 ;		buffer is populated with string of number input by user.
@@ -163,6 +172,8 @@ _GetNumber:
 	CALL		ValidateInput
 
 	; Validate number to ensure it fits in the boundaries of a SDWORD
+	PUSH		[EBP+32]
+	PUSH		[EBP+28]
 	PUSH		[EBP+20]
 	PUSH		[EBP+12]
 	PUSH		[EBP+8]
@@ -181,7 +192,7 @@ _GetNumber:
 _DoneReadingValue:
 	POPAD
 	POP		EBP
-	RET		12
+	RET		28
 ReadVal ENDP
 
 ; ---------------------------------------------------------------------
@@ -268,9 +279,11 @@ ValidateInput ENDP
 ; 32 bit register.
 ;
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
-;					isValid is a BYTE. Buffer contains the string input
-;					by the user and buffer size contains the length of
-;					the string input by the user.
+;					isValid is a BYTE. Max and min valid values are
+;					initialized to SDWORD upper and lower boundaries.
+;					Buffer contains the string input by the user and
+;					buffer size contains the length of the string input
+;					by the user.
 ;
 ; Postconditions: None.
 ;
@@ -278,6 +291,8 @@ ValidateInput ENDP
 ;		[EBP+8] = reference to buffer size for user input.
 ;		[EBP+12] = reference to buffer for user input.
 ;		[EBP+16] = reference to isValid boolean.
+;		[EBP+20] = reference to max valid value for number.
+;		[EBP+24] = reference to min valid value for number.
 ;
 ; Returns:
 ;		isValid as 1 if input is valid, 0 if input is invalid.
@@ -298,15 +313,33 @@ _ComputeNumber:
 	MOV		EAX, numToCheck
 	MOV		EDX, 10
 	MUL		EDX
-	MOV		numToCheck, EAX
+	PUSH	EAX
 	LODSB
 	SUB		AL, 48
-	ADD		BYTE PTR numToCheck, AL
+	MOVSX	EBX, AL
+	POP		EAX
+	ADD		EAX, EBX
+	CMP		EAX, [EBP+20]
+	JO		_NumberInvalid
+	MOV		numToCheck, EAX
 
 	LOOP	_ComputeNumber
 
+_NumberValid:
+	; If number is within SDWORD bounds, return isValid as 1
+	MOV		EBX, [EBP+16]
+	MOV		DWORD PTR [EBX], 1
+	JMP		_ValidationComplete
+
+_NumberInvalid:
+	; If number is outside SDWORD bounds, return isValid as 0
+	MOV		EBX, [EBP+16]
+	MOV		DWORD PTR [EBX], 0
+
+_ValidationComplete:
+
 	POPAD
-	RET		12
+	RET		20
 ValidateNumber ENDP
 
 END main
