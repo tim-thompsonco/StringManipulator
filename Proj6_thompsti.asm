@@ -80,8 +80,20 @@ main PROC
 	PUSH	OFFSET instructions
 	CALL	introduction
 
+	; Obtain values from user
+	MOV		ECX, NUMCOUNT
+_GetValue:
+	; Get first address of validatedNums that is empty to store number in
+	MOV		EAX, NUMCOUNT
+	MOV		EBX, ECX
+	SUB		EAX, EBX
+	MOV		EBX, 4
+	MUL		EBX
+	MOV		ESI, OFFSET validatedNums
+	ADD		ESI, EAX
+
 	; Request signed integer number from user
-	PUSH	OFFSET validatedNums
+	PUSH	ESI
 	PUSH	MINVALIDVAL
 	PUSH	MAXVALIDVAL
 	PUSH	OFFSET errorMessage
@@ -90,6 +102,8 @@ main PROC
 	PUSH	OFFSET buffer
 	PUSH	OFFSET bufferSize
 	CALL	ReadVal
+
+	LOOP _GetValue
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
