@@ -79,6 +79,23 @@ mShowIntroduction	MACRO introMessage:REQ, instructions:REQ
 	POP		EDX
 ENDM
 
+; ---------------------------------------------------------------------
+; Name: mShowErrorMessage
+;
+; Displays an error message to the console.
+;
+; Receives:
+;		errorMessage = reference to address of error message.
+; ---------------------------------------------------------------------
+mShowErrorMessage	MACRO errorMessage:REQ
+	PUSH	EDX
+
+	MOV		EDX, errorMessage
+	CALL	WriteString
+
+	POP		EDX
+ENDM
+
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
@@ -191,8 +208,7 @@ _GetNumber:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_CheckNumberSize
-	MOV			EDX, [EBP+24]
-	CALL		WriteString
+	mShowErrorMessage [EBP+24]
 	JMP			_GetNumber
 
 _CheckNumberSize:
@@ -211,8 +227,7 @@ _CheckNumberSize:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_DoneReadingValue
-	MOV			EDX, [EBP+24]
-	CALL		WriteString
+	mShowErrorMessage [EBP+24]
 	JMP			_GetNumber
 
 _DoneReadingValue:
