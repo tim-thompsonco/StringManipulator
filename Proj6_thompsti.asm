@@ -21,23 +21,25 @@ INCLUDE Irvine32.inc
 ; Prompt user to provide a signed integer number that fits inside a
 ; SDWORD and then store user input as string.
 ;
-; Preconditions:	Prompt is initialized and is a BYTE array containing
+; Preconditions:	prompt is initialized and is a BYTE array containing
 ;					the user prompt to display. userInput is initialized
 ;					and is a BYTE array. userInputLength is initialized
-;					and is a DWORD.
+;					and is a DWORD. bufferMaxSize is a constant containing
+;					the max value that the input buffer can hold.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
-;		prompt = address of user prompt to display
-;		userInput = address of buffer array to store user input
-;		userInputLength = address of buffer size to store input length
+;		prompt = address of user prompt to display.
+;		userInput = address of buffer array to store user input.
+;		userInputLength = address of buffer size to store input length.
+;		bufferMaxSize = constant value of max size of input buffer.
 ;
 ; Returns:
 ;		userInput contains string of number entered by user.
 ;		userInputLength contains length of string entered by user.
 ; ---------------------------------------------------------------------
-mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
+mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ, bufferMaxSize:REQ
 	PUSHAD
 
 	; Prompt user for signed integer number
@@ -46,7 +48,7 @@ mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
 
 	; Store user input
 	MOV		EDX, userInput
-	MOV		ECX, 30
+	MOV		ECX, bufferMaxSize
 	CALL	ReadString
 
 	; Store size of user input
@@ -143,7 +145,7 @@ ENDM
 ;		buffer size is populated with length of user inputted number.
 ;		numArr contains validated numbers input by user.
 ; ---------------------------------------------------------------------
-mGetValues	MACRO numsToGet:REQ, numArr:REQ, minVal:REQ, maxVal:REQ, errorMsg:REQ, isNumValid:REQ, numPrompt:REQ, inputBuffer:REQ, inputBufferSize:REQ
+mGetValues	MACRO numsToGet:REQ, bufferMaxSize:REQ, minVal:REQ, maxVal:REQ, errorMsg:REQ, isNumValid:REQ, numPrompt:REQ, inputBuffer:REQ, inputBufferSize:REQ, numArr:REQ
 	PUSHAD
 
 	MOV		ECX, numsToGet
@@ -158,6 +160,7 @@ _GetValue:
 	ADD		ESI, EAX
 
 	; Request signed integer number from user
+	PUSH	bufferMaxSize
 	PUSH	ESI
 	PUSH	minVal
 	PUSH	maxVal
@@ -176,6 +179,7 @@ ENDM
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
+	BUFFERMAXSIZE = 11
 
 .data
 
@@ -186,7 +190,7 @@ ENDM
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 	numberPrompt	BYTE	"Please enter a signed number: ",0
 	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
-	buffer			BYTE	30 DUP(?)
+	buffer			BYTE	BUFFERMAXSIZE DUP(?)
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
 	validatedNums	SDWORD	NUMCOUNT DUP(?)
@@ -198,7 +202,7 @@ main PROC
 	mShowIntroduction introMessage, instructions
 
 	; Obtain values from user
-	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize
+	mGetValues NUMCOUNT, BUFFERMAXSIZE, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize, validatedNums
 
 	; Say goodbye to the user
 	mShowGoodbye goodbyeMessage
@@ -237,6 +241,7 @@ main ENDP
 ;		[EBP+28] = reference to max valid value for number.
 ;		[EBP+32] = reference to min valid value for number.
 ;		[EBP+36] = reference to array to store validated numbers.
+;		[EBP+40] = constant value of max size of buffer.
 ;
 ; Returns:
 ;		buffer is populated with string of number input by user.
@@ -253,7 +258,7 @@ ReadVal PROC
 
 _GetNumber:
 	; Call macro to get and store number input by user
-	mGetString	[EBP+16], [EBP+12], EDI
+	mGetString	[EBP+16], [EBP+12], EDI, [EBP+40]
 
 	; Validate user input to ensure it is not empty and is a number
 	PUSH		[EBP+20]
@@ -292,7 +297,7 @@ _CheckNumberSize:
 _DoneReadingValue:
 	POPAD
 	POP		EBP
-	RET		32
+	RET		36
 ReadVal ENDP
 
 ; ---------------------------------------------------------------------
