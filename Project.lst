@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:20:26
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -90,11 +90,11 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
 					PUSH	EDX
 
 					; Display introduction to user
-					MOV		EDX, introMessage
+					MOV		EDX, OFFSET introMessage
 					CALL	WriteString
 
 					; Display program instructions to user
-					MOV		EDX, instructions
+					MOV		EDX, OFFSET instructions
 					CALL	WriteString
 
 					POP		EDX
@@ -195,16 +195,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
 	   20 54 68 6F 6D
 	   70 73 6F 6E 0D
 	   0A 0D 0A 00
- 00000040 50 6C 65 61 73		instructions	BYTE	"Please provide 10 signed decimal integers.",13,10
+ 00000040 50 6C 65 61 73		instructions	BYTE	"Please provide ",NUMCOUNT," signed decimal integers.",13,10
 	   65 20 70 72 6F
 	   76 69 64 65 20
-	   31 30 20 73 69
-	   67 6E 65 64 20
-	   64 65 63 69 6D
-	   61 6C 20 69 6E
-	   74 65 67 65 72
-	   73 2E 0D 0A
- 0000006C  45 61 63 68 20						BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
+	   0A 20 73 69 67
+	   6E 65 64 20 64
+	   65 63 69 6D 61
+	   6C 20 69 6E 74
+	   65 67 65 72 73
+	   2E 0D 0A
+ 0000006B  45 61 63 68 20						BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
 	   6E 75 6D 62 65
 	   72 20 6E 65 65
 	   64 73 20 74 6F
@@ -225,7 +225,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
 	   65 64 20 65 6E
 	   74 65 72 69 6E
 	   67 0D 0A
- 000000D3  74 68 65 20 72						BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
+ 000000D2  74 68 65 20 72						BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 	   61 77 20 6E 75
 	   6D 62 65 72 73
 	   2C 20 49 20 77
@@ -245,14 +245,14 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
 	   76 61 6C 75 65
 	   2E 0D 0A 0D 0A
 	   00
- 00000133 50 6C 65 61 73		numberPrompt	BYTE	"Please enter a signed number: ",0
+ 00000132 50 6C 65 61 73		numberPrompt	BYTE	"Please enter a signed number: ",0
 	   65 20 65 6E 74
 	   65 72 20 61 20
 	   73 69 67 6E 65
 	   64 20 6E 75 6D
 	   62 65 72 3A 20
 	   00
- 00000152 45 52 52 4F 52		errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
+ 00000151 45 52 52 4F 52		errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	   3A 20 59 6F 75
 	   72 20 6E 75 6D
 	   62 65 72 20 77
@@ -275,12 +275,12 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
 	   72 79 20 61 67
 	   61 69 6E 2E 0D
 	   0A 00
- 000001C2  0000001E [			buffer			BYTE	30 DUP(?)
+ 000001C1  0000001E [			buffer			BYTE	30 DUP(?)
 	    00
 	   ]
- 000001E0 00000000			bufferSize		DWORD	0
- 000001E4 00000000			isNumberValid	DWORD	0
- 000001E8  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
+ 000001DF 00000000			bufferSize		DWORD	0
+ 000001E3 00000000			isNumberValid	DWORD	0
+ 000001E7  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
 
@@ -288,7 +288,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
  00000000			main PROC
 
 					; Introduce program to user and display instructions
-					mShowIntroduction OFFSET introMessage, OFFSET instructions
+					mShowIntroduction introMessage, instructions
  00000000  52		     1		PUSH	EDX
  00000001  BA 00000000 R     1		MOV		EDX, OFFSET introMessage
  00000006  E8 00000000 E     1		CALL	WriteString
@@ -306,16 +306,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
  00000023  2B C3	     1		SUB		EAX, EBX
  00000025  BB 00000004	     1		MOV		EBX, 4
  0000002A  F7 E3	     1		MUL		EBX
- 0000002C  BE 000001E8 R     1		MOV		ESI, OFFSET validatedNums
+ 0000002C  BE 000001E7 R     1		MOV		ESI, OFFSET validatedNums
  00000031  03 F0	     1		ADD		ESI, EAX
  00000033  56		     1		PUSH	ESI
  00000034  68 80000000	     1		PUSH	MINVALIDVAL
  00000039  68 7FFFFFFF	     1		PUSH	MAXVALIDVAL
- 0000003E  68 00000152 R     1		PUSH	OFFSET errorMessage
- 00000043  68 000001E4 R     1		PUSH	OFFSET isNumberValid
- 00000048  68 00000133 R     1		PUSH	OFFSET numberPrompt
- 0000004D  68 000001C2 R     1		PUSH	OFFSET buffer
- 00000052  68 000001E0 R     1		PUSH	OFFSET bufferSize
+ 0000003E  68 00000151 R     1		PUSH	OFFSET errorMessage
+ 00000043  68 000001E3 R     1		PUSH	OFFSET isNumberValid
+ 00000048  68 00000132 R     1		PUSH	OFFSET numberPrompt
+ 0000004D  68 000001C1 R     1		PUSH	OFFSET buffer
+ 00000052  68 000001DF R     1		PUSH	OFFSET bufferSize
  00000057  E8 0000000A	     1		CALL	ReadVal
  0000005C  E2 BE	     1		LOOP _GetValue
  0000005E  61		     1		POPAD
@@ -661,7 +661,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
  00000199			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:16:09
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/27/20 14:20:26
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -765,7 +765,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000210 Para	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000020F Para	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 00000199 Para	  Public  'CODE'	
 
 
@@ -1122,16 +1122,16 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bufferSize . . . . . . . . . . .	DWord	 000001E0 _DATA	
-buffer . . . . . . . . . . . . .	Byte	 000001C2 _DATA	
+bufferSize . . . . . . . . . . .	DWord	 000001DF _DATA	
+buffer . . . . . . . . . . . . .	Byte	 000001C1 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-errorMessage . . . . . . . . . .	Byte	 00000152 _DATA	
+errorMessage . . . . . . . . . .	Byte	 00000151 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 instructions . . . . . . . . . .	Byte	 00000040 _DATA	
 introMessage . . . . . . . . . .	Byte	 00000000 _DATA	
-isNumberValid  . . . . . . . . .	DWord	 000001E4 _DATA	
+isNumberValid  . . . . . . . . .	DWord	 000001E3 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -1139,9 +1139,9 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numberPrompt . . . . . . . . . .	Byte	 00000133 _DATA	
+numberPrompt . . . . . . . . . .	Byte	 00000132 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-validatedNums  . . . . . . . . .	DWord	 000001E8 _DATA	
+validatedNums  . . . . . . . . .	DWord	 000001E7 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   

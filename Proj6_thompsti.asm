@@ -69,11 +69,11 @@ mShowIntroduction	MACRO introMessage:REQ, instructions:REQ
 	PUSH	EDX
 
 	; Display introduction to user
-	MOV		EDX, introMessage
+	MOV		EDX, OFFSET introMessage
 	CALL	WriteString
 
 	; Display program instructions to user
-	MOV		EDX, instructions
+	MOV		EDX, OFFSET instructions
 	CALL	WriteString
 
 	POP		EDX
@@ -176,7 +176,7 @@ ENDM
 main PROC
 
 	; Introduce program to user and display instructions
-	mShowIntroduction OFFSET introMessage, OFFSET instructions
+	mShowIntroduction introMessage, instructions
 
 	; Obtain values from user
 	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize
