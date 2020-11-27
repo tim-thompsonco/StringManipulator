@@ -190,6 +190,7 @@ _GetNumber:
 	JMP			_GetNumber
 
 _DoneReadingValue:
+
 	POPAD
 	POP		EBP
 	RET		28
@@ -266,6 +267,7 @@ _ValidationSuccess:
 	MOV		DWORD PTR [EBX], 1
 
 _ValidationDone:
+
 	POPAD
 	POP		EBP
 	RET		12
@@ -298,8 +300,8 @@ ValidateInput ENDP
 ;		isValid as 1 if input is valid, 0 if input is invalid.
 ; ---------------------------------------------------------------------
 ValidateNumber PROC
-	LOCAL	numToCheck:SDWORD
-	MOV		numToCheck, 0
+	LOCAL	numIsNegative:BYTE
+	MOV		numIsNegative, 0
 	PUSHAD
 
 	; Store parameters for validation
@@ -307,10 +309,33 @@ ValidateNumber PROC
 	MOV		ECX, [EBX]
 	MOV		ESI, [EBP+12]
 
-	; Compute number from user input string
+	; Check first buffer character to see if it's a sign
+	MOV		EAX, [ESI]
+	CMP		AL, 43
+	JZ		_PositiveSign
+	CMP		AL, 45
+	JZ		_NegativeSign
+	JMP		_ReadyToCompute
+
+	; If the first character is positive, advance ESI one character
+_PositiveSign:
+	ADD		ESI, 1
+	DEC		ECX
+	JMP		_ReadyToCompute
+
+	; If the first character is negative, advance ESI one character, set numIsNegative boolean
+_NegativeSign:
+	INC		BYTE PTR numIsNegative
+	ADD		ESI, 1
+	DEC		ECX
+
+_ReadyToCompute:
+	; Prepare EAX and direction flag for number computation
+	MOV		EAX, 0
 	CLD
+
+	; Compute number from user input string
 _ComputeNumber:
-	MOV		EAX, numToCheck
 	MOV		EDX, 10
 	MUL		EDX
 	PUSH	EAX
@@ -319,11 +344,25 @@ _ComputeNumber:
 	MOVSX	EBX, AL
 	POP		EAX
 	ADD		EAX, EBX
-	CMP		EAX, [EBP+20]
-	JO		_NumberInvalid
-	MOV		numToCheck, EAX
 
 	LOOP	_ComputeNumber
+
+	; Determine if number is negative and go to appropriate limit check
+	CMP		numIsNegative, 1
+	JZ		_CheckMinLimit
+
+_CheckMaxLimit:
+	; Check if number is above maximum value
+	CMP		EAX, [EBP+20]
+	JO		_NumberInvalid
+	JMP		_NumberValid
+
+_CheckMinLimit:
+	; Check if negative number is below minimum value
+	MOV		EBX, -1
+	MUL		EBX
+	CMP		EAX, [EBP+24]
+	JO		_NumberInvalid
 
 _NumberValid:
 	; If number is within SDWORD bounds, return isValid as 1
