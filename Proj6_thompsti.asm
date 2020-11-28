@@ -22,23 +22,24 @@ INCLUDE Irvine32.inc
 ; SDWORD and then store user input as string.
 ;
 ; Preconditions:	Prompt is initialized and is a BYTE array containing
-;					the user prompt to display. userInput is initialized
-;					and is a BYTE array. userInputLength is initialized
-;					and is a DWORD.
+;					the user prompt to display. inputBuffer is initialized
+;					and is a BYTE array. inputBufferLength is initialized
+;					and is a DWORD. maxBufferSize is initialized and is
+;					a DWORD.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
 ;		prompt = address of user prompt to display.
-;		userInput = address of buffer array to store user input.
-;		userInputLength = address of buffer size to store input length.
-;		maxBuffer = constant value of max buffer size.
+;		inputBuffer = address of buffer array to store user input.
+;		inputBufferLength = address of buffer size to store input length.
+;		maxBufferSize = value of max buffer size.
 ;
 ; Returns:
-;		userInput contains string of number entered by user.
-;		userInputLength contains length of string entered by user.
+;		inputBuffer contains string of number entered by user.
+;		inputBufferLength contains length of string entered by user.
 ; ---------------------------------------------------------------------
-mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ, maxBuffer:REQ
+mGetString	MACRO prompt:REQ, inputBuffer:REQ, inputBufferLength:REQ, maxBufferSize:REQ
 	PUSHAD
 
 	; Prompt user for signed integer number
@@ -46,12 +47,12 @@ mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ, maxBuffer:REQ
 	CALL	WriteString
 
 	; Store user input
-	MOV		EDX, userInput
-	MOV		ECX, maxBuffer
+	MOV		EDX, inputBuffer
+	MOV		ECX, maxBufferSize
 	CALL	ReadString
 
 	; Store size of user input
-	MOV		[userInputLength], EAX
+	MOV		[inputBufferLength], EAX
 
 	POPAD
 ENDM
