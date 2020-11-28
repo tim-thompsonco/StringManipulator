@@ -222,7 +222,7 @@ ShowMessage ENDP
 ;
 ; Obtain a signed integer number from the user, validate that it is a
 ; valid signed integer number which can fit in a 32 bit register, and
-; then store the validated number in buffer. The length of the string
+; then store the validated number in an array. The length of the string
 ; entered by the user is stored in bufferSize. If the number is invalid
 ; then another number is requested from the user, until a valid number
 ; is provided.
@@ -234,25 +234,26 @@ ShowMessage ENDP
 ;					if the number is invalid. Max and min valid values
 ;					are	initialized to SDWORD upper and lower boundaries.
 ;					validatedNums is a SDWORD array, initialized, and
-;					has capacity to accept another number.
+;					has capacity to accept another number. maxBufferSize
+;					contains the maximum length the input buffer accepts.
 ;
 ; Postconditions:	isNumberValid contains a 1 if the number entered
 ;					by the user is valid, 0 if the number is invalid.
+;					buffer is populated with string of number input by user.
+;					bufferSize is populated with length of user inputted number.
 ;
 ; Receives:
-;		[EBP+8] = reference to buffer size for user input.
-;		[EBP+12] = reference to buffer for user input.
-;		[EBP+16] = reference to user prompt.
-;		[EBP+20] = reference to boolean isNumberValid.
-;		[EBP+24] = reference to error message for invalid entry.
-;		[EBP+28] = reference to max valid value for number.
-;		[EBP+32] = reference to min valid value for number.
-;		[EBP+36] = reference to array to store validated numbers.
-;		[EBP+40] = constant value of max buffer size.
+;		[EBP+8] = address of buffer size for user input.
+;		[EBP+12] = address of buffer for user input.
+;		[EBP+16] = address of user prompt.
+;		[EBP+20] = address of boolean value isNumberValid.
+;		[EBP+24] = address of error message for invalid entry.
+;		[EBP+28] = value of max valid value for number.
+;		[EBP+32] = value of min valid value for number.
+;		[EBP+36] = address of array to store validated numbers.
+;		[EBP+40] = value of max buffer size.
 ;
 ; Returns:
-;		buffer is populated with string of number input by user.
-;		buffer size is populated with length of user inputted number.
 ;		validatedNums array contains number input by user.
 ; ---------------------------------------------------------------------
 ReadVal PROC
@@ -314,7 +315,7 @@ ReadVal ENDP
 ;
 ; Validate the user input passed into the buffer. The user input stored
 ; in buffer is checked to ensure it is not an empty string and it does
-; not have non-numeric characters in it.
+; not have non-numeric characters in it other than an optional leading sign.
 ;
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
 ;					isValid is a BYTE. Buffer contains the string input
@@ -324,9 +325,9 @@ ReadVal ENDP
 ; Postconditions: None.
 ;
 ; Receives:
-;		[EBP+8] = reference to buffer size for user input.
-;		[EBP+12] = reference to buffer for user input.
-;		[EBP+16] = reference to isValid boolean.
+;		[EBP+8] = address of buffer size for user input.
+;		[EBP+12] = address of buffer for user input.
+;		[EBP+16] = address of boolean value isValid.
 ;
 ; Returns:
 ;		isValid as 1 if input is valid, 0 if input is invalid.
@@ -392,22 +393,22 @@ ValidateInput ENDP
 ; the min/max of a SDWORD, so that it is capable of fitting inside a
 ; 32 bit register.
 ;
-; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
+; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD, and
 ;					isValid is a BYTE. Max and min valid values are
 ;					initialized to SDWORD upper and lower boundaries.
 ;					Buffer contains the string input by the user and
-;					buffer size contains the length of the string input
+;					bufferSize contains the length of the string input
 ;					by the user.
 ;
 ; Postconditions: validatedNums array contains number if valid.
 ;
 ; Receives:
-;		[EBP+8] = reference to buffer size for user input.
-;		[EBP+12] = reference to buffer for user input.
-;		[EBP+16] = reference to isValid boolean.
-;		[EBP+20] = reference to max valid value for number.
-;		[EBP+24] = reference to min valid value for number.
-;		[EBP+28] = reference to array to store validated numbers.
+;		[EBP+8] = address of buffer size for user input.
+;		[EBP+12] = address of buffer for user input.
+;		[EBP+16] = address of boolean value isValid.
+;		[EBP+20] = value of max valid value for number.
+;		[EBP+24] = value of min valid value for number.
+;		[EBP+28] = address of array to store validated numbers.
 ;
 ; Returns:
 ;		isValid as 1 if input is valid, 0 if input is invalid.
@@ -503,17 +504,17 @@ ValidateNumber ENDP
 ; Convert a numeric value into a string of ASCII digits and then display
 ; the value to the console.
 ;
-; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
+; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
 ;					Number is a SDWORD. All three identifiers are
 ;					initialized and number is validated.
 ;
-; Postconditions:	Buffer contains reversed number. Buffer size contains
-;					length of number.
+; Postconditions:	Buffer contains reversed number as string of ASCII
+;					digits. bufferSize contains length of number.
 ;
 ; Receives:
-;		[EBP+8] = reference to address of buffer size for user input.
-;		[EBP+12] = reference to address of buffer for user input.
-;		[EBP+16] = reference to value of number.
+;		[EBP+8] = address of bufferSize for user input.
+;		[EBP+12] = address of buffer for user input.
+;		[EBP+16] = value of number.
 ;
 ; Returns: None.
 ; ---------------------------------------------------------------------
