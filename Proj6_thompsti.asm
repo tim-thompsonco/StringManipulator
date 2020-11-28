@@ -61,21 +61,21 @@ ENDM
 ; Reads string of ASCII digits in buffer and then displays the string
 ; to the console.
 ;
-; Preconditions:	Prompt is initialized and is a BYTE array containing
-;					the user prompt to display. userInput is initialized
-;					and is a BYTE array. userInputLength is initialized
-;					and is a DWORD.
+; Preconditions:	outputBuffer is an address pointing to the end of a
+;					BYTE array containing the string of ASCII digits to
+;					display. outputBufferLength contains the number of
+;					characters in the ASCII string. numIsNegative is a
+;					boolean containing 1 if number is negative and 0 if
+;					number is positive.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
-;		prompt = address of user prompt to display
-;		userInput = address of buffer array to store user input
-;		userInputLength = address of buffer size to store input length
+;		outputBuffer = address of end of array containing string of digits.
+;		outputBufferLength = length of outputBuffer.
+;		numIsNegative = boolean for whether number is negative or not.
 ;
-; Returns:
-;		userInput contains string of number entered by user.
-;		userInputLength contains length of string entered by user.
+; Returns: None.
 ; ---------------------------------------------------------------------
 mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ, numIsNegative:REQ
 	PUSHAD
