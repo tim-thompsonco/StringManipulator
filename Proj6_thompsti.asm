@@ -567,19 +567,62 @@ ValidateNumber ENDP
 ; Returns: None.
 ; ---------------------------------------------------------------------
 WriteVal PROC
-	PUSH		EBP
-	MOV			EBP, ESP
+	LOCAL	numToWrite:SDWORD
+	LOCAL	numIsNegative:BYTE
+	LOCAL	numLength:BYTE
+	MOV		numLength, 0
 	PUSHAD
 
-	; To get string of ascii digits, use / 10 trick to strip off
-	; the last digit of number and store in buffer, increment
-	; buffer size as you do, and once done the number will be in
-	; buffer in reverse. Should be able to use buffer size to get
-	; to end of reverse number and walk backwards through array
-	; to print correctly.
+	MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
+	MOV		EAX, [EBP+16]			; Value of number to be converted
+	CLD
+
+	; Check number, and if negative, set numIsNegative boolean to true
+	CMP		EAX, 0
+	JGE		_ConvertNumber
+	NEG		EAX
+	INC		BYTE PTR numIsNegative
+
+	; Store number in local variable since EAX/EDX will be used for division
+	MOV		numToWrite, EAX
+
+_ConvertNumber:
+	; Strip off last digit using division and store in buffer
+	MOV		EAX, numToWrite
+	MOV		EBX, 10
+	CDQ
+	DIV		EBX
+	PUSH	EAX
+	MOV		AL, DL
+	ADD		AL, 48					; Convert back to ASCII character for number
+	STOSB
+	INC		BYTE PTR numLength
+	POP		EAX
+	MOV		numToWrite, EAX
+	CMP		EAX, 0
+	JNZ		_ConvertNumber
+
+	; Check if number is negative, and if so, display sign
+	CMP		numIsNegative, 1
+	JNZ		_BeginNumberDisplay
+	MOV		AL, '-'
+	CALL	WriteChar
+
+_BeginNumberDisplay:
+
+	; Number has been stored in buffer in reverse, so we walk backwards through string of digits
+	MOV		ESI, EDI
+	DEC		ESI						; Since STOSB increments to next address, get back to end of number
+	STD
+	MOVZX	ECX, numLength
+
+_DisplayNumber:
+	LODSB
+	CALL	WriteChar
+
+	LOOP _DisplayNumber
 	
 	POPAD
-	POP		EBP
 	RET		12
 WriteVal ENDP
 

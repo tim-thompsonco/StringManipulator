@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 07:47:32
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:54:20
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -768,24 +768,71 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 07:47:32
 				; Returns: None.
 				; ---------------------------------------------------------------------
  000001D7			WriteVal PROC
- 000001D7  55				PUSH		EBP
- 000001D8  8B EC			MOV			EBP, ESP
- 000001DA  60				PUSHAD
+					LOCAL	numToWrite:SDWORD
+					LOCAL	numIsNegative:BYTE
+					LOCAL	numLength:BYTE
+ 000001D7  55		   *	    push   ebp
+ 000001D8  8B EC	   *	    mov    ebp, esp
+ 000001DA  83 C4 F8	   *	    add    esp, 0FFFFFFF8h
+ 000001DD  C6 45 FA 00			MOV		numLength, 0
+ 000001E1  60				PUSHAD
 
-					; To get string of ascii digits, use / 10 trick to strip off
-					; the last digit of number and store in buffer, increment
-					; buffer size as you do, and once done the number will be in
-					; buffer in reverse. Should be able to use buffer size to get
-					; to end of reverse number and walk backwards through array
-					; to print correctly.
+ 000001E2  8B 7D 0C			MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
+ 000001E5  8B 45 10			MOV		EAX, [EBP+16]			; Value of number to be converted
+ 000001E8  FC				CLD
+
+					; Check number, and if negative, set numIsNegative boolean to true
+ 000001E9  83 F8 00			CMP		EAX, 0
+ 000001EC  7D 08			JGE		_ConvertNumber
+ 000001EE  F7 D8			NEG		EAX
+ 000001F0  FE 45 FB			INC		BYTE PTR numIsNegative
+
+					; Store number in local variable since EAX/EDX will be used for division
+ 000001F3  89 45 FC			MOV		numToWrite, EAX
+
+ 000001F6			_ConvertNumber:
+					; Strip off last digit using division and store in buffer
+ 000001F6  8B 45 FC			MOV		EAX, numToWrite
+ 000001F9  BB 0000000A			MOV		EBX, 10
+ 000001FE  99				CDQ
+ 000001FF  F7 F3			DIV		EBX
+ 00000201  50				PUSH	EAX
+ 00000202  8A C2			MOV		AL, DL
+ 00000204  04 30			ADD		AL, 48					; Convert back to ASCII character for number
+ 00000206  AA				STOSB
+ 00000207  FE 45 FA			INC		BYTE PTR numLength
+ 0000020A  58				POP		EAX
+ 0000020B  89 45 FC			MOV		numToWrite, EAX
+ 0000020E  83 F8 00			CMP		EAX, 0
+ 00000211  75 E3			JNZ		_ConvertNumber
+
+					; Check if number is negative, and if so, display sign
+ 00000213  80 7D FB 01			CMP		numIsNegative, 1
+ 00000217  75 07			JNZ		_BeginNumberDisplay
+ 00000219  B0 2D			MOV		AL, '-'
+ 0000021B  E8 00000000 E		CALL	WriteChar
+
+ 00000220			_BeginNumberDisplay:
+
+					; Number has been stored in buffer in reverse, so we walk backwards through string of digits
+ 00000220  8B F7			MOV		ESI, EDI
+ 00000222  4E				DEC		ESI						; Since STOSB increments to next address, get back to end of number
+ 00000223  FD				STD
+ 00000224  0F B6 4D FA			MOVZX	ECX, numLength
+
+ 00000228			_DisplayNumber:
+ 00000228  AC				LODSB
+ 00000229  E8 00000000 E		CALL	WriteChar
+
+ 0000022E  E2 F8			LOOP _DisplayNumber
 					
- 000001DB  61				POPAD
- 000001DC  5D				POP		EBP
- 000001DD  C2 000C			RET		12
- 000001E0			WriteVal ENDP
+ 00000230  61				POPAD
+ 00000231  C9		   *	    leave  
+ 00000232  C2 000C			RET		12
+ 00000235			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 07:47:32
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:54:20
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -892,7 +939,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000259 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001E0 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000235 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -1020,7 +1067,13 @@ WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteVal . . . . . . . . . . . .	P Near	 000001D7 _TEXT	Length= 00000009 Public STDCALL
+WriteVal . . . . . . . . . . . .	P Near	 000001D7 _TEXT	Length= 0000005E Public STDCALL
+  numToWrite . . . . . . . . . .	DWord	 bp - 00000004
+  numIsNegative  . . . . . . . .	Byte	 bp - 00000005
+  numLength  . . . . . . . . . .	Byte	 bp - 00000006
+  _ConvertNumber . . . . . . . .	L Near	 000001F6 _TEXT	
+  _BeginNumberDisplay  . . . . .	L Near	 00000220 _TEXT	
+  _DisplayNumber . . . . . . . .	L Near	 00000228 _TEXT	
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000AD Public STDCALL
   _GetValue  . . . . . . . . . .	L Near	 0000001C _TEXT	
