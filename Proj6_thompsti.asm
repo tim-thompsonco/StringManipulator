@@ -173,6 +173,63 @@ _GetValue:
 	POPAD
 ENDM
 
+; ---------------------------------------------------------------------
+; Name: mWriteValues
+;
+; Write 10 signed integer numbers from an array of numbers by converting
+; them into strings of ASCII digits and then displaying to the console.
+;
+; Preconditions:	numArr is a SDWORD array and is populated with numbers
+;					to write to console. numsToWrite is a constant value
+;					containing the length of numArr. outputBuffer is a BYTE
+;					array and is initialized. outputBufferSize is a DWORD
+;					and is initialized. resultDisplay is a BYTE array
+;					that is initialized to the prompt to display before
+;					writing values.
+;
+; Postconditions:	outputBuffer will contain the reverse string of ASCII
+;					digits for the last number written to the console.
+;					outputBufferSize will contain the length of the last
+;					string of digits written to the console.
+;
+; Receives:
+;		numArr = address of array with validated numbers.
+;		numsToWrite = constant value of numbers to write.
+;		outputBuffer = address of buffer to store string of ASCII digits.
+;		outputBufferSize = address to store length of buffer.
+;		resultDisplay = address of prompt to display to console before values.
+;
+; Returns:	None.
+; ---------------------------------------------------------------------
+mWriteValues	MACRO numArr:REQ, numsToWrite:REQ, outputBuffer:REQ, outputBufferSize:REQ, resultDisplay:REQ
+	PUSHAD
+
+	; Notify user that they have entered numbers which are about to be written
+	MOV		EDX, OFFSET resultDisplay
+	CALL	WriteString
+	
+	MOV		ECX, numsToWrite
+_WriteValue:
+	; Get address of next number to write to console
+	MOV		EAX, numsToWrite
+	MOV		EBX, ECX
+	SUB		EAX, EBX
+	MOV		EBX, 4
+	MUL		EBX
+	MOV		ESI, OFFSET numArr
+	ADD		ESI, EAX
+
+	; Write value to console
+	PUSH	[ESI]
+	PUSH	OFFSET outputBuffer
+	PUSH	OFFSET outputBufferSize
+	CALL	WriteVal
+
+	LOOP _WriteValue
+
+	POPAD
+ENDM
+
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
@@ -187,6 +244,7 @@ ENDM
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 	numberPrompt	BYTE	"Please enter a signed number: ",0
 	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
+	resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
 	buffer			BYTE	MAXBUFFERSIZE DUP(?)
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
@@ -200,6 +258,9 @@ main PROC
 
 	; Obtain values from user
 	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize
+
+	; Write values to console
+	mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
 
 	; Say goodbye to the user
 	mShowGoodbye goodbyeMessage
