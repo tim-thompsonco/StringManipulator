@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:58:08
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -262,7 +262,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:58:08
 
  =-80000000				MINVALIDVAL = -2147483648
  = 7FFFFFFF				MAXVALIDVAL = 2147483647
- = 00000001				NUMCOUNT = 1
+ = 0000000A				NUMCOUNT = 10
  = 0000000B				MAXBUFFERSIZE = 11
 
  00000000			.data
@@ -385,7 +385,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:58:08
 	   ]
  00000229 00000000			bufferSize		DWORD	0
  0000022D 00000000			isNumberValid	DWORD	0
- 00000231  00000001 [			validatedNums	SDWORD	NUMCOUNT DUP(?)
+ 00000231  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
 
@@ -404,9 +404,9 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:58:08
 					; Obtain values from user
 					mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize
  00000016  60		     1		PUSHAD
- 00000017  B9 00000001	     1		MOV		ECX, NUMCOUNT
+ 00000017  B9 0000000A	     1		MOV		ECX, NUMCOUNT
  0000001C		     1	_GetValue:
- 0000001C  B8 00000001	     1		MOV		EAX, NUMCOUNT
+ 0000001C  B8 0000000A	     1		MOV		EAX, NUMCOUNT
  00000021  8B D9	     1		MOV		EBX, ECX
  00000023  2B C3	     1		SUB		EAX, EBX
  00000025  BB 00000004	     1		MOV		EBX, 4
@@ -430,16 +430,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:58:08
  0000005F  60		     1		PUSHAD
  00000060  BA 000001FF R     1		MOV		EDX, OFFSET resultPrompt1
  00000065  E8 00000000 E     1		CALL	WriteString
- 0000006A  B9 00000001	     1		MOV		ECX, NUMCOUNT
+ 0000006A  B9 0000000A	     1		MOV		ECX, NUMCOUNT
  0000006F		     1	_WriteValue:
- 0000006F  B8 00000001	     1		MOV		EAX, NUMCOUNT
+ 0000006F  B8 0000000A	     1		MOV		EAX, NUMCOUNT
  00000074  8B D9	     1		MOV		EBX, ECX
  00000076  2B C3	     1		SUB		EAX, EBX
  00000078  BB 00000004	     1		MOV		EBX, 4
  0000007D  F7 E3	     1		MUL		EBX
  0000007F  BE 00000231 R     1		MOV		ESI, OFFSET validatedNums
  00000084  03 F0	     1		ADD		ESI, EAX
- 00000086  83 F9 01	     1		CMP		ECX, NUMCOUNT
+ 00000086  83 F9 0A	     1		CMP		ECX, NUMCOUNT
  00000089  74 0E	     1		JZ		_ShowNumber
  0000008B  B0 2C	     1		MOV		AL, ','
  0000008D  E8 00000000 E     1		CALL	WriteChar
@@ -797,58 +797,59 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:58:08
  000001F8  8B 45 10			MOV		EAX, [EBP+16]			; Value of number to be converted
  000001FB  FC				CLD
 
-					; Check number, and if negative, set numIsNegative boolean to true
- 000001FC  83 F8 00			CMP		EAX, 0
- 000001FF  7D 08			JGE		_ConvertNumber
- 00000201  F7 D8			NEG		EAX
- 00000203  FE 45 FB			INC		BYTE PTR numIsNegative
-
 					; Store number in local variable since EAX/EDX will be used for division
- 00000206  89 45 FC			MOV		numToWrite, EAX
+ 000001FC  89 45 FC			MOV		numToWrite, EAX
 
- 00000209			_ConvertNumber:
+					; Check number, and if negative, set numIsNegative boolean to true
+ 000001FF  83 F8 00			CMP		EAX, 0
+ 00000202  7D 08			JGE		_ConvertNumber
+ 00000204  F7 D8			NEG		EAX
+ 00000206  FE 45 FB			INC		BYTE PTR numIsNegative
+ 00000209  89 45 FC			MOV		numToWrite, EAX			; If negative, update numToWrite so value is positive
+
+ 0000020C			_ConvertNumber:
 					; Strip off last digit using division and store in buffer
- 00000209  8B 45 FC			MOV		EAX, numToWrite
- 0000020C  BB 0000000A			MOV		EBX, 10
- 00000211  99				CDQ
- 00000212  F7 F3			DIV		EBX
- 00000214  50				PUSH	EAX
- 00000215  8A C2			MOV		AL, DL
- 00000217  04 30			ADD		AL, 48					; Convert back to ASCII character for number
- 00000219  AA				STOSB
- 0000021A  FE 45 FA			INC		BYTE PTR numLength
- 0000021D  58				POP		EAX
- 0000021E  89 45 FC			MOV		numToWrite, EAX
- 00000221  83 F8 00			CMP		EAX, 0
- 00000224  75 E3			JNZ		_ConvertNumber
+ 0000020C  8B 45 FC			MOV		EAX, numToWrite
+ 0000020F  BB 0000000A			MOV		EBX, 10
+ 00000214  99				CDQ
+ 00000215  F7 F3			DIV		EBX
+ 00000217  50				PUSH	EAX
+ 00000218  8A C2			MOV		AL, DL
+ 0000021A  04 30			ADD		AL, 48					; Convert back to ASCII character for number
+ 0000021C  AA				STOSB
+ 0000021D  FE 45 FA			INC		BYTE PTR numLength
+ 00000220  58				POP		EAX
+ 00000221  89 45 FC			MOV		numToWrite, EAX
+ 00000224  83 F8 00			CMP		EAX, 0
+ 00000227  75 E3			JNZ		_ConvertNumber
 
 					; Check if number is negative, and if so, display sign
- 00000226  80 7D FB 01			CMP		numIsNegative, 1
- 0000022A  75 07			JNZ		_BeginNumberDisplay
- 0000022C  B0 2D			MOV		AL, '-'
- 0000022E  E8 00000000 E		CALL	WriteChar
+ 00000229  80 7D FB 01			CMP		numIsNegative, 1
+ 0000022D  75 07			JNZ		_BeginNumberDisplay
+ 0000022F  B0 2D			MOV		AL, '-'
+ 00000231  E8 00000000 E		CALL	WriteChar
 
- 00000233			_BeginNumberDisplay:
+ 00000236			_BeginNumberDisplay:
 
 					; Number has been stored in buffer in reverse, so we walk backwards through string of digits
- 00000233  8B F7			MOV		ESI, EDI
- 00000235  4E				DEC		ESI						; Since STOSB increments to next address, get back to end of number
- 00000236  FD				STD
- 00000237  0F B6 4D FA			MOVZX	ECX, numLength
+ 00000236  8B F7			MOV		ESI, EDI
+ 00000238  4E				DEC		ESI						; Since STOSB increments to next address, get back to end of number
+ 00000239  FD				STD
+ 0000023A  0F B6 4D FA			MOVZX	ECX, numLength
 
- 0000023B			_DisplayNumber:
- 0000023B  AC				LODSB
- 0000023C  E8 00000000 E		CALL	WriteChar
+ 0000023E			_DisplayNumber:
+ 0000023E  AC				LODSB
+ 0000023F  E8 00000000 E		CALL	WriteChar
 
- 00000241  E2 F8			LOOP _DisplayNumber
+ 00000244  E2 F8			LOOP _DisplayNumber
 					
- 00000243  61				POPAD
- 00000244  C9		   *	    leave  
- 00000245  C2 000C			RET		12
- 00000248			WriteVal ENDP
+ 00000246  61				POPAD
+ 00000247  C9		   *	    leave  
+ 00000248  C2 000C			RET		12
+ 0000024B			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 08:58:08
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -954,8 +955,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000235 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000248 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000259 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000024B Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -1083,13 +1084,13 @@ WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteVal . . . . . . . . . . . .	P Near	 000001EA _TEXT	Length= 0000005E Public STDCALL
+WriteVal . . . . . . . . . . . .	P Near	 000001EA _TEXT	Length= 00000061 Public STDCALL
   numToWrite . . . . . . . . . .	DWord	 bp - 00000004
   numIsNegative  . . . . . . . .	Byte	 bp - 00000005
   numLength  . . . . . . . . . .	Byte	 bp - 00000006
-  _ConvertNumber . . . . . . . .	L Near	 00000209 _TEXT	
-  _BeginNumberDisplay  . . . . .	L Near	 00000233 _TEXT	
-  _DisplayNumber . . . . . . . .	L Near	 0000023B _TEXT	
+  _ConvertNumber . . . . . . . .	L Near	 0000020C _TEXT	
+  _BeginNumberDisplay  . . . . .	L Near	 00000236 _TEXT	
+  _DisplayNumber . . . . . . . .	L Near	 0000023E _TEXT	
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000C0 Public STDCALL
   _GetValue  . . . . . . . . . .	L Near	 0000001C _TEXT	
@@ -1217,7 +1218,7 @@ MINVALIDVAL  . . . . . . . . . .	Number	 -80000000h
 MOUSE_EVENT  . . . . . . . . . .	Number	 00000002h   
 MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
-NUMCOUNT . . . . . . . . . . . .	Number	 00000001h   
+NUMCOUNT . . . . . . . . . . . .	Number	 0000000Ah   
 NUMLOCK_ON . . . . . . . . . . .	Number	 00000020h   
 OPEN_ALWAYS  . . . . . . . . . .	Number	 00000004h   
 OPEN_EXISTING  . . . . . . . . .	Number	 00000003h   
