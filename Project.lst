@@ -1,11 +1,11 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 13:54:35
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:12:02
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
 				TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 
 				; Author: Tim Thompson
-				; Last Modified: 11/27/20
+				; Last Modified: 11/28/20
 				; OSU email address: thompsti@oregonstate.edu
 				; Course number/section:   CS271 Section 400
 				; Project Number:       6         Due Date: 12/6/20
@@ -140,72 +140,6 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 13:54:35
 					CALL	WriteString
 
 					POP		EDX
-				ENDM
-
-				; ---------------------------------------------------------------------
-				; Name: mWriteValues
-				;
-				; Write 10 signed integer numbers from an array of numbers by converting
-				; them into strings of ASCII digits and then displaying to the console.
-				;
-				; Preconditions:	numArr is a SDWORD array and is populated with numbers
-				;					to write to console. numsToWrite is a constant value
-				;					containing the length of numArr. outputBuffer is a BYTE
-				;					array and is initialized. outputBufferSize is a DWORD
-				;					and is initialized. resultDisplay is a BYTE array
-				;					that is initialized to the prompt to display before
-				;					writing values.
-				;
-				; Postconditions:	outputBuffer will contain the reverse string of ASCII
-				;					digits for the last number written to the console.
-				;					outputBufferSize will contain the length of the last
-				;					string of digits written to the console.
-				;
-				; Receives:
-				;		numArr = address of array with validated numbers.
-				;		numsToWrite = constant value of numbers to write.
-				;		outputBuffer = address of buffer to store string of ASCII digits.
-				;		outputBufferSize = address to store length of buffer.
-				;		resultDisplay = address of prompt to display to console before values.
-				;
-				; Returns:	None.
-				; ---------------------------------------------------------------------
-				mWriteValues	MACRO numArr:REQ, numsToWrite:REQ, outputBuffer:REQ, outputBufferSize:REQ, resultDisplay:REQ
-					PUSHAD
-
-					; Notify user that they have entered numbers which are about to be written
-					MOV		EDX, OFFSET resultDisplay
-					CALL	WriteString
-					
-					MOV		ECX, numsToWrite
-				_WriteValue:
-					; Get address of next number to write to console
-					MOV		EAX, numsToWrite
-					MOV		EBX, ECX
-					SUB		EAX, EBX
-					MOV		EBX, 4
-					MUL		EBX
-					MOV		ESI, OFFSET numArr
-					ADD		ESI, EAX
-
-					; If value to write isn't first one to show, add spacing before number
-					CMP		ECX, numsToWrite
-					JZ		_ShowNumber
-					MOV		AL, ','
-					CALL	WriteChar
-					MOV		AL, ' '
-					CALL	WriteChar
-
-				_ShowNumber:
-					; Write value to console
-					PUSH	[ESI]
-					PUSH	OFFSET outputBuffer
-					PUSH	OFFSET outputBufferSize
-					CALL	WriteVal
-
-					LOOP _WriteValue
-
-					POPAD
 				ENDM
 
  =-80000000				MINVALIDVAL = -2147483648
@@ -373,33 +307,41 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 13:54:35
 
  00000053  E2 BC			LOOP _GetValue
 
-					; Write values to console
-					mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
- 00000055  60		     1		PUSHAD
+					; Notify user that they have entered numbers which are about to be written
+					mShowMessage OFFSET resultPrompt1
+ 00000055  52		     1		PUSH	EDX
  00000056  BA 00000202 R     1		MOV		EDX, OFFSET resultPrompt1
  0000005B  E8 00000000 E     1		CALL	WriteString
- 00000060  B9 0000000A	     1		MOV		ECX, NUMCOUNT
- 00000065		     1	_WriteValue:
- 00000065  B8 0000000A	     1		MOV		EAX, NUMCOUNT
- 0000006A  8B D9	     1		MOV		EBX, ECX
- 0000006C  2B C3	     1		SUB		EAX, EBX
- 0000006E  BB 00000004	     1		MOV		EBX, 4
- 00000073  F7 E3	     1		MUL		EBX
- 00000075  BE 00000238 R     1		MOV		ESI, OFFSET validatedNums
- 0000007A  03 F0	     1		ADD		ESI, EAX
- 0000007C  83 F9 0A	     1		CMP		ECX, NUMCOUNT
- 0000007F  74 0E	     1		JZ		_ShowNumber
- 00000081  B0 2C	     1		MOV		AL, ','
- 00000083  E8 00000000 E     1		CALL	WriteChar
- 00000088  B0 20	     1		MOV		AL, ' '
- 0000008A  E8 00000000 E     1		CALL	WriteChar
- 0000008F		     1	_ShowNumber:
- 0000008F  FF 36	     1		PUSH	[ESI]
- 00000091  68 00000221 R     1		PUSH	OFFSET buffer
- 00000096  68 00000230 R     1		PUSH	OFFSET bufferSize
- 0000009B  E8 0000013E	     1		CALL	WriteVal
- 000000A0  E2 C3	     1		LOOP _WriteValue
- 000000A2  61		     1		POPAD
+ 00000060  5A		     1		POP		EDX
+					
+					; Write values to console
+ 00000061  B9 0000000A			MOV		ECX, NUMCOUNT
+ 00000066			_WriteValue:
+					; Get address of next number to write to console
+ 00000066  B8 0000000A			MOV		EAX, NUMCOUNT
+ 0000006B  8B D9			MOV		EBX, ECX
+ 0000006D  2B C3			SUB		EAX, EBX
+ 0000006F  BB 00000004			MOV		EBX, 4
+ 00000074  F7 E3			MUL		EBX
+ 00000076  BE 00000238 R		MOV		ESI, OFFSET validatedNums
+ 0000007B  03 F0			ADD		ESI, EAX
+
+					; If value to write isn't first one to show, add spacing before number
+ 0000007D  83 F9 0A			CMP		ECX, NUMCOUNT
+ 00000080  74 0E			JZ		_ShowNumber
+ 00000082  B0 2C			MOV		AL, ','
+ 00000084  E8 00000000 E		CALL	WriteChar
+ 00000089  B0 20			MOV		AL, ' '
+ 0000008B  E8 00000000 E		CALL	WriteChar
+
+ 00000090			_ShowNumber:
+					; Write value to console
+ 00000090  FF 36			PUSH	[ESI]
+ 00000092  68 00000221 R		PUSH	OFFSET buffer
+ 00000097  68 00000230 R		PUSH	OFFSET bufferSize
+ 0000009C  E8 0000013D			CALL	WriteVal
+
+ 000000A1  E2 C3			LOOP _WriteValue
 
 					; Say goodbye to the user
 					mShowMessage OFFSET goodbyeMessage
@@ -797,7 +739,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 13:54:35
  00000241			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 13:54:35
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:12:02
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -810,7 +752,6 @@ Macros:
 mDisplayString . . . . . . . . .	Proc
 mGetString . . . . . . . . . . .	Proc
 mShowMessage . . . . . . . . . .	Proc
-mWriteValues . . . . . . . . . .	Proc
 
 
 Structures and Unions:
@@ -1040,8 +981,8 @@ WriteVal . . . . . . . . . . . .	P Near	 000001DE _TEXT	Length= 00000063 Public 
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000B6 Public STDCALL
   _GetValue  . . . . . . . . . .	L Near	 00000011 _TEXT	
-  _WriteValue  . . . . . . . . .	L Near	 00000065 _TEXT	
-  _ShowNumber  . . . . . . . . .	L Near	 0000008F _TEXT	
+  _WriteValue  . . . . . . . . .	L Near	 00000066 _TEXT	
+  _ShowNumber  . . . . . . . . .	L Near	 00000090 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C

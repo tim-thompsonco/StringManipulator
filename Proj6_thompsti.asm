@@ -1,7 +1,7 @@
 TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 
 ; Author: Tim Thompson
-; Last Modified: 11/27/20
+; Last Modified: 11/28/20
 ; OSU email address: thompsti@oregonstate.edu
 ; Course number/section:   CS271 Section 400
 ; Project Number:       6         Due Date: 12/6/20
@@ -121,72 +121,6 @@ mShowMessage	MACRO message:REQ
 	POP		EDX
 ENDM
 
-; ---------------------------------------------------------------------
-; Name: mWriteValues
-;
-; Write 10 signed integer numbers from an array of numbers by converting
-; them into strings of ASCII digits and then displaying to the console.
-;
-; Preconditions:	numArr is a SDWORD array and is populated with numbers
-;					to write to console. numsToWrite is a constant value
-;					containing the length of numArr. outputBuffer is a BYTE
-;					array and is initialized. outputBufferSize is a DWORD
-;					and is initialized. resultDisplay is a BYTE array
-;					that is initialized to the prompt to display before
-;					writing values.
-;
-; Postconditions:	outputBuffer will contain the reverse string of ASCII
-;					digits for the last number written to the console.
-;					outputBufferSize will contain the length of the last
-;					string of digits written to the console.
-;
-; Receives:
-;		numArr = address of array with validated numbers.
-;		numsToWrite = constant value of numbers to write.
-;		outputBuffer = address of buffer to store string of ASCII digits.
-;		outputBufferSize = address to store length of buffer.
-;		resultDisplay = address of prompt to display to console before values.
-;
-; Returns:	None.
-; ---------------------------------------------------------------------
-mWriteValues	MACRO numArr:REQ, numsToWrite:REQ, outputBuffer:REQ, outputBufferSize:REQ, resultDisplay:REQ
-	PUSHAD
-
-	; Notify user that they have entered numbers which are about to be written
-	MOV		EDX, OFFSET resultDisplay
-	CALL	WriteString
-	
-	MOV		ECX, numsToWrite
-_WriteValue:
-	; Get address of next number to write to console
-	MOV		EAX, numsToWrite
-	MOV		EBX, ECX
-	SUB		EAX, EBX
-	MOV		EBX, 4
-	MUL		EBX
-	MOV		ESI, OFFSET numArr
-	ADD		ESI, EAX
-
-	; If value to write isn't first one to show, add spacing before number
-	CMP		ECX, numsToWrite
-	JZ		_ShowNumber
-	MOV		AL, ','
-	CALL	WriteChar
-	MOV		AL, ' '
-	CALL	WriteChar
-
-_ShowNumber:
-	; Write value to console
-	PUSH	[ESI]
-	PUSH	OFFSET outputBuffer
-	PUSH	OFFSET outputBufferSize
-	CALL	WriteVal
-
-	LOOP _WriteValue
-
-	POPAD
-ENDM
-
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
@@ -239,8 +173,37 @@ _GetValue:
 
 	LOOP _GetValue
 
+	; Notify user that they have entered numbers which are about to be written
+	mShowMessage OFFSET resultPrompt1
+	
 	; Write values to console
-	mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
+	MOV		ECX, NUMCOUNT
+_WriteValue:
+	; Get address of next number to write to console
+	MOV		EAX, NUMCOUNT
+	MOV		EBX, ECX
+	SUB		EAX, EBX
+	MOV		EBX, 4
+	MUL		EBX
+	MOV		ESI, OFFSET validatedNums
+	ADD		ESI, EAX
+
+	; If value to write isn't first one to show, add spacing before number
+	CMP		ECX, NUMCOUNT
+	JZ		_ShowNumber
+	MOV		AL, ','
+	CALL	WriteChar
+	MOV		AL, ' '
+	CALL	WriteChar
+
+_ShowNumber:
+	; Write value to console
+	PUSH	[ESI]
+	PUSH	OFFSET buffer
+	PUSH	OFFSET bufferSize
+	CALL	WriteVal
+
+	LOOP _WriteValue
 
 	; Say goodbye to the user
 	mShowMessage OFFSET goodbyeMessage
