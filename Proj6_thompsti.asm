@@ -66,27 +66,18 @@ ENDM
 ; Preconditions:	outputBuffer is an address pointing to the end of a
 ;					BYTE array containing the string of ASCII digits to
 ;					display. outputBufferLength contains the number of
-;					characters in the ASCII string. numIsNegative is a
-;					boolean containing 1 if number is negative and 0 if
-;					number is positive.
+;					characters in the ASCII string.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
 ;		outputBuffer = address of end of array containing string of digits.
 ;		outputBufferLength = value of length of outputBuffer.
-;		numIsNegative = boolean value of whether number is negative or not.
 ;
 ; Returns: None.
 ; ---------------------------------------------------------------------
-mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ, numIsNegative:REQ
+mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ
 	PUSHAD
-
-	; Check if number is negative, and if so, display sign
-	CMP		numIsNegative, 1
-	JNZ		_BeginNumberDisplay
-	MOV		AL, '-'
-	CALL	WriteChar
 
 _BeginNumberDisplay:
 	; Number has been stored in buffer in reverse, so we walk backwards through string of digits
@@ -555,11 +546,19 @@ _ConvertNumber:
 	CMP		EAX, 0
 	JNZ		_ConvertNumber
 
+	; Check if number is negative, and if so, add sign to end of string
+	CMP		numIsNegative, 1
+	JNZ		_ConversionDone
+	MOV		AL, '-'
+	STOSB
+	INC		BYTE PTR numLength
+
+_ConversionDone:
 	; Since STOSB increments to next address, get back to last digit
 	DEC		EDI
 
 	; Display number to console
-	mDisplayString EDI, numLength, numIsNegative
+	mDisplayString EDI, numLength
 
 	POPAD
 	RET		12
