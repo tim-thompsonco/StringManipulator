@@ -46,7 +46,7 @@ mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
 
 	; Store user input
 	MOV		EDX, userInput
-	MOV		ECX, 11
+	MOV		ECX, 15
 	CALL	ReadString
 
 	; Store size of user input
@@ -290,7 +290,7 @@ ENDM
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
-	MAXBUFFERSIZE = 11
+	MAXBUFFERSIZE = 15
 
 .data
 
@@ -522,10 +522,9 @@ ValidateNumber PROC
 	MOV		numIsNegative, 0
 	PUSHAD
 
-	; Store parameters for validation
-	MOV		EBX, [EBP+8]
-	MOV		ECX, [EBX]
-	MOV		ESI, [EBP+12]
+	MOV		EBX, [EBP+8]			; address of buffer size
+	MOV		ECX, [EBX]				; value of buffer size
+	MOV		ESI, [EBP+12]			; address of buffer
 
 	; Check first buffer character to see if it's a sign
 	MOV		EAX, [ESI]

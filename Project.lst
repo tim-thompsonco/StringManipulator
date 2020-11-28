@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 10:48:24
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -67,7 +67,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
 
 					; Store user input
 					MOV		EDX, userInput
-					MOV		ECX, 11
+					MOV		ECX, 15
 					CALL	ReadString
 
 					; Store size of user input
@@ -311,7 +311,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
  =-80000000				MINVALIDVAL = -2147483648
  = 7FFFFFFF				MAXVALIDVAL = 2147483647
  = 0000000A				NUMCOUNT = 10
- = 0000000B				MAXBUFFERSIZE = 11
+ = 0000000F				MAXBUFFERSIZE = 15
 
  00000000			.data
 
@@ -428,12 +428,12 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
 	   6E 75 6D 62 65
 	   72 73 3A 0D 0A
 	   00
- 00000220  0000000B [			buffer			BYTE	MAXBUFFERSIZE DUP(?)
+ 00000220  0000000F [			buffer			BYTE	MAXBUFFERSIZE DUP(?)
 	    00
 	   ]
- 0000022B 00000000			bufferSize		DWORD	0
- 0000022F 00000000			isNumberValid	DWORD	0
- 00000233  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
+ 0000022F 00000000			bufferSize		DWORD	0
+ 00000233 00000000			isNumberValid	DWORD	0
+ 00000237  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
 
@@ -459,16 +459,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
  00000023  2B C3	     1		SUB		EAX, EBX
  00000025  BB 00000004	     1		MOV		EBX, 4
  0000002A  F7 E3	     1		MUL		EBX
- 0000002C  BE 00000233 R     1		MOV		ESI, OFFSET validatedNums
+ 0000002C  BE 00000237 R     1		MOV		ESI, OFFSET validatedNums
  00000031  03 F0	     1		ADD		ESI, EAX
  00000033  56		     1		PUSH	ESI
  00000034  68 80000000	     1		PUSH	MINVALIDVAL
  00000039  68 7FFFFFFF	     1		PUSH	MAXVALIDVAL
  0000003E  68 00000191 R     1		PUSH	OFFSET errorMessage
- 00000043  68 0000022F R     1		PUSH	OFFSET isNumberValid
+ 00000043  68 00000233 R     1		PUSH	OFFSET isNumberValid
  00000048  68 00000172 R     1		PUSH	OFFSET numberPrompt
  0000004D  68 00000220 R     1		PUSH	OFFSET buffer
- 00000052  68 0000022B R     1		PUSH	OFFSET bufferSize
+ 00000052  68 0000022F R     1		PUSH	OFFSET bufferSize
  00000057  E8 00000064	     1		CALL	ReadVal
  0000005C  E2 BE	     1		LOOP _GetValue
  0000005E  61		     1		POPAD
@@ -485,7 +485,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
  00000076  2B C3	     1		SUB		EAX, EBX
  00000078  BB 00000004	     1		MOV		EBX, 4
  0000007D  F7 E3	     1		MUL		EBX
- 0000007F  BE 00000233 R     1		MOV		ESI, OFFSET validatedNums
+ 0000007F  BE 00000237 R     1		MOV		ESI, OFFSET validatedNums
  00000084  03 F0	     1		ADD		ESI, EAX
  00000086  83 F9 0A	     1		CMP		ECX, NUMCOUNT
  00000089  74 0E	     1		JZ		_ShowNumber
@@ -496,7 +496,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
  00000099		     1	_ShowNumber:
  00000099  FF 36	     1		PUSH	[ESI]
  0000009B  68 00000220 R     1		PUSH	OFFSET buffer
- 000000A0  68 0000022B R     1		PUSH	OFFSET bufferSize
+ 000000A0  68 0000022F R     1		PUSH	OFFSET bufferSize
  000000A5  E8 00000140	     1		CALL	WriteVal
  000000AA  E2 C3	     1		LOOP _WriteValue
  000000AC  61		     1		POPAD
@@ -565,7 +565,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
  000000C8  8B 55 10	     1		MOV		EDX, [EBP+16]
  000000CB  E8 00000000 E     1		CALL	WriteString
  000000D0  8B 55 0C	     1		MOV		EDX, [EBP+12]
- 000000D3  B9 0000000B	     1		MOV		ECX, 11
+ 000000D3  B9 0000000F	     1		MOV		ECX, 15
  000000D8  E8 00000000 E     1		CALL	ReadString
  000000DD  89 07	     1		MOV		[EDI], EAX
  000000DF  61		     1		POPAD
@@ -729,10 +729,9 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
  00000179  C6 45 FF 00			MOV		numIsNegative, 0
  0000017D  60				PUSHAD
 
-					; Store parameters for validation
- 0000017E  8B 5D 08			MOV		EBX, [EBP+8]
- 00000181  8B 0B			MOV		ECX, [EBX]
- 00000183  8B 75 0C			MOV		ESI, [EBP+12]
+ 0000017E  8B 5D 08			MOV		EBX, [EBP+8]			; address of buffer size
+ 00000181  8B 0B			MOV		ECX, [EBX]				; value of buffer size
+ 00000183  8B 75 0C			MOV		ESI, [EBP+12]			; address of buffer
 
 					; Check first buffer character to see if it's a sign
  00000186  8B 06			MOV		EAX, [ESI]
@@ -897,7 +896,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
  0000024D			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:45:37
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 10:48:24
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -1004,7 +1003,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000025B Para	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000025F Para	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 0000024D Para	  Public  'CODE'	
 
 
@@ -1236,7 +1235,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
-MAXBUFFERSIZE  . . . . . . . . .	Number	 0000000Bh   
+MAXBUFFERSIZE  . . . . . . . . .	Number	 0000000Fh   
 MAXVALIDVAL  . . . . . . . . . .	Number	 7FFFFFFFh   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
@@ -1370,7 +1369,7 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bufferSize . . . . . . . . . . .	DWord	 0000022B _DATA	
+bufferSize . . . . . . . . . . .	DWord	 0000022F _DATA	
 buffer . . . . . . . . . . . . .	Byte	 00000220 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 errorMessage . . . . . . . . . .	Byte	 00000191 _DATA	
@@ -1380,7 +1379,7 @@ gray . . . . . . . . . . . . . .	Number	 00000008h
 green  . . . . . . . . . . . . .	Number	 00000002h   
 instructions . . . . . . . . . .	Byte	 0000007F _DATA	
 introMessage . . . . . . . . . .	Byte	 00000000 _DATA	
-isNumberValid  . . . . . . . . .	DWord	 0000022F _DATA	
+isNumberValid  . . . . . . . . .	DWord	 00000233 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -1391,7 +1390,7 @@ magenta  . . . . . . . . . . . .	Number	 00000005h
 numberPrompt . . . . . . . . . .	Byte	 00000172 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 resultPrompt1  . . . . . . . . .	Byte	 00000201 _DATA	
-validatedNums  . . . . . . . . .	DWord	 00000233 _DATA	
+validatedNums  . . . . . . . . .	DWord	 00000237 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
