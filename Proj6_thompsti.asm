@@ -74,8 +74,8 @@ ENDM
 ;
 ; Receives:
 ;		outputBuffer = address of end of array containing string of digits.
-;		outputBufferLength = length of outputBuffer.
-;		numIsNegative = boolean for whether number is negative or not.
+;		outputBufferLength = value of length of outputBuffer.
+;		numIsNegative = boolean value of whether number is negative or not.
 ;
 ; Returns: None.
 ; ---------------------------------------------------------------------
@@ -94,11 +94,11 @@ _BeginNumberDisplay:
 	STD
 	MOVZX	ECX, outputBufferLength
 
-_DisplayNumber:
+_DisplayDigit:
 	LODSB
 	CALL	WriteChar
 
-	LOOP	_DisplayNumber
+	LOOP	_DisplayDigit
 
 	POPAD
 ENDM

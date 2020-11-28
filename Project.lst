@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:26:52
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:32:34
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -95,8 +95,8 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:26:52
 				;
 				; Receives:
 				;		outputBuffer = address of end of array containing string of digits.
-				;		outputBufferLength = length of outputBuffer.
-				;		numIsNegative = boolean for whether number is negative or not.
+				;		outputBufferLength = value of length of outputBuffer.
+				;		numIsNegative = boolean value of whether number is negative or not.
 				;
 				; Returns: None.
 				; ---------------------------------------------------------------------
@@ -115,11 +115,11 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:26:52
 					STD
 					MOVZX	ECX, outputBufferLength
 
-				_DisplayNumber:
+				_DisplayDigit:
 					LODSB
 					CALL	WriteChar
 
-					LOOP	_DisplayNumber
+					LOOP	_DisplayDigit
 
 					POPAD
 				ENDM
@@ -715,10 +715,10 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:26:52
  00000233  8B F7	     1		MOV		ESI, EDI
  00000235  FD		     1		STD
  00000236  0F B6 4D FA	     1		MOVZX	ECX, numLength
- 0000023A		     1	_DisplayNumber:
+ 0000023A		     1	_DisplayDigit:
  0000023A  AC		     1		LODSB
  0000023B  E8 00000000 E     1		CALL	WriteChar
- 00000240  E2 F8	     1		LOOP	_DisplayNumber
+ 00000240  E2 F8	     1		LOOP	_DisplayDigit
  00000242  61		     1		POPAD
 
  00000243  61				POPAD
@@ -727,7 +727,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:26:52
  00000248			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:26:52
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:32:34
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -965,7 +965,7 @@ WriteVal . . . . . . . . . . . .	P Near	 000001E5 _TEXT	Length= 00000063 Public 
   numLength  . . . . . . . . . .	Byte	 bp - 00000006
   _ConvertNumber . . . . . . . .	L Near	 00000207 _TEXT	
   _BeginNumberDisplay  . . . . .	L Near	 00000233 _TEXT	
-  _DisplayNumber . . . . . . . .	L Near	 0000023A _TEXT	
+  _DisplayDigit  . . . . . . . .	L Near	 0000023A _TEXT	
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000B0 Public STDCALL
   _GetValue  . . . . . . . . . .	L Near	 0000000F _TEXT	
