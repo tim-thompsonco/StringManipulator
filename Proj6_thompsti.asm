@@ -104,23 +104,6 @@ _DisplayNumber:
 	POPAD
 ENDM
 
-; ---------------------------------------------------------------------
-; Name: mShowMessage
-;
-; Displays a message to the console.
-;
-; Receives:
-;		message = address of message.
-; ---------------------------------------------------------------------
-mShowMessage	MACRO message:REQ
-	PUSH	EDX
-
-	MOV		EDX, message
-	CALL	WriteString
-
-	POP		EDX
-ENDM
-
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
 	NUMCOUNT = 10
@@ -145,7 +128,8 @@ ENDM
 main PROC
 
 	; Introduce program to user and display instructions
-	mShowMessage OFFSET introMessage
+	PUSH	OFFSET introMessage
+	CALL	ShowMessage
 
 	; Obtain values from user
 	MOV		ECX, NUMCOUNT
@@ -174,7 +158,8 @@ _GetValue:
 	LOOP _GetValue
 
 	; Notify user that they have entered numbers which are about to be written
-	mShowMessage OFFSET resultPrompt1
+	PUSH	OFFSET resultPrompt1
+	CALL	ShowMessage
 	
 	; Write values to console
 	MOV		ECX, NUMCOUNT
@@ -206,10 +191,32 @@ _ShowNumber:
 	LOOP _WriteValue
 
 	; Say goodbye to the user
-	mShowMessage OFFSET goodbyeMessage
+	PUSH	OFFSET goodbyeMessage
+	CALL	ShowMessage
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
+
+; ---------------------------------------------------------------------
+; Name: ShowMessage
+;
+; Displays a message to the console.
+;
+; Receives:
+;		[EBP+8] = address of message.
+; ---------------------------------------------------------------------
+ShowMessage	PROC
+	PUSH	EBP
+	MOV		EBP, ESP
+	PUSH	EDX
+
+	MOV		EDX, [EBP+8]
+	CALL	WriteString
+
+	POP		EDX
+	POP		EBP
+	RET		4
+ShowMessage ENDP
 
 ; ---------------------------------------------------------------------
 ; Name: ReadVal
@@ -273,7 +280,8 @@ _GetNumber:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_CheckNumberSize
-	mShowMessage [EBP+24]
+	PUSH		[EBP+24]
+	CALL		ShowMessage
 	JMP			_GetNumber
 
 _CheckNumberSize:
@@ -292,7 +300,8 @@ _CheckNumberSize:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_DoneReadingValue
-	mShowMessage [EBP+24]
+	PUSH		[EBP+24]
+	CALL		ShowMessage
 	JMP			_GetNumber
 
 _DoneReadingValue:
