@@ -219,6 +219,15 @@ _WriteValue:
 	MOV		ESI, OFFSET numArr
 	ADD		ESI, EAX
 
+	; If value to write isn't first one to show, add spacing before number
+	CMP		ECX, numsToWrite
+	JZ		_ShowNumber
+	MOV		AL, ','
+	CALL	WriteChar
+	MOV		AL, ' '
+	CALL	WriteChar
+
+_ShowNumber:
 	; Write value to console
 	PUSH	[ESI]
 	PUSH	OFFSET outputBuffer
@@ -232,7 +241,7 @@ ENDM
 
 	MINVALIDVAL = -2147483648
 	MAXVALIDVAL = 2147483647
-	NUMCOUNT = 10
+	NUMCOUNT = 1
 	MAXBUFFERSIZE = 11
 
 .data
