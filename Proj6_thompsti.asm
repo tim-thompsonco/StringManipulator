@@ -115,24 +115,7 @@ ENDM
 mShowMessage	MACRO message:REQ
 	PUSH	EDX
 
-	MOV		EDX, OFFSET message
-	CALL	WriteString
-
-	POP		EDX
-ENDM
-
-; ---------------------------------------------------------------------
-; Name: mShowErrorMessage
-;
-; Displays an error message to the console.
-;
-; Receives:
-;		errorMessage = reference to address of error message.
-; ---------------------------------------------------------------------
-mShowErrorMessage	MACRO errorMessage:REQ
-	PUSH	EDX
-
-	MOV		EDX, errorMessage
+	MOV		EDX, message
 	CALL	WriteString
 
 	POP		EDX
@@ -289,7 +272,7 @@ ENDM
 main PROC
 
 	; Introduce program to user and display instructions
-	mShowMessage introMessage
+	mShowMessage OFFSET introMessage
 
 	; Obtain values from user
 	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize, MAXBUFFERSIZE
@@ -298,7 +281,7 @@ main PROC
 	mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
 
 	; Say goodbye to the user
-	mShowMessage goodbyeMessage
+	mShowMessage OFFSET goodbyeMessage
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
@@ -365,7 +348,7 @@ _GetNumber:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_CheckNumberSize
-	mShowErrorMessage [EBP+24]
+	mShowMessage [EBP+24]
 	JMP			_GetNumber
 
 _CheckNumberSize:
@@ -384,7 +367,7 @@ _CheckNumberSize:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_DoneReadingValue
-	mShowErrorMessage [EBP+24]
+	mShowMessage [EBP+24]
 	JMP			_GetNumber
 
 _DoneReadingValue:

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:45:55
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -136,24 +136,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
 				mShowMessage	MACRO message:REQ
 					PUSH	EDX
 
-					MOV		EDX, OFFSET message
-					CALL	WriteString
-
-					POP		EDX
-				ENDM
-
-				; ---------------------------------------------------------------------
-				; Name: mShowErrorMessage
-				;
-				; Displays an error message to the console.
-				;
-				; Receives:
-				;		errorMessage = reference to address of error message.
-				; ---------------------------------------------------------------------
-				mShowErrorMessage	MACRO errorMessage:REQ
-					PUSH	EDX
-
-					MOV		EDX, errorMessage
+					MOV		EDX, message
 					CALL	WriteString
 
 					POP		EDX
@@ -356,7 +339,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
 	   76 61 6C 75 65
 	   2E 0D 0A 0D 0A
 	   00
- 00000132 0D 0A 0D 0A 53		goodbyeMessage	BYTE	13,10,13,10,"So long and thanks for all the knowledge! Wonderful class.",0
+ 00000132 0D 0A 0D 0A 53		goodbyeMessage	BYTE	13,10,13,10,"So long and thanks for all the knowledge! Wonderful class.",13,10,0
 	   6F 20 6C 6F 6E
 	   67 20 61 6E 64
 	   20 74 68 61 6E
@@ -368,15 +351,15 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
 	   20 57 6F 6E 64
 	   65 72 66 75 6C
 	   20 63 6C 61 73
-	   73 2E 00
- 00000171 50 6C 65 61 73		numberPrompt	BYTE	"Please enter a signed number: ",0
+	   73 2E 0D 0A 00
+ 00000173 50 6C 65 61 73		numberPrompt	BYTE	"Please enter a signed number: ",0
 	   65 20 65 6E 74
 	   65 72 20 61 20
 	   73 69 67 6E 65
 	   64 20 6E 75 6D
 	   62 65 72 3A 20
 	   00
- 00000190 45 52 52 4F 52		errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
+ 00000192 45 52 52 4F 52		errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	   3A 20 59 6F 75
 	   72 20 6E 75 6D
 	   62 65 72 20 77
@@ -399,19 +382,19 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
 	   72 79 20 61 67
 	   61 69 6E 2E 0D
 	   0A 00
- 00000200 0D 0A 59 6F 75		resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
+ 00000202 0D 0A 59 6F 75		resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
 	   20 65 6E 74 65
 	   72 65 64 20 74
 	   68 65 73 65 20
 	   6E 75 6D 62 65
 	   72 73 3A 0D 0A
 	   00
- 0000021F  0000000F [			buffer			BYTE	MAXBUFFERSIZE DUP(?)
+ 00000221  0000000F [			buffer			BYTE	MAXBUFFERSIZE DUP(?)
 	    00
 	   ]
- 0000022E 00000000			bufferSize		DWORD	0
- 00000232 00000000			isNumberValid	DWORD	0
- 00000236  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
+ 00000230 00000000			bufferSize		DWORD	0
+ 00000234 00000000			isNumberValid	DWORD	0
+ 00000238  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
 
@@ -419,7 +402,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
  00000000			main PROC
 
 					; Introduce program to user and display instructions
-					mShowMessage introMessage
+					mShowMessage OFFSET introMessage
  00000000  52		     1		PUSH	EDX
  00000001  BA 00000000 R     1		MOV		EDX, OFFSET introMessage
  00000006  E8 00000000 E     1		CALL	WriteString
@@ -435,17 +418,17 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
  00000019  2B C3	     1		SUB		EAX, EBX
  0000001B  BB 00000004	     1		MOV		EBX, 4
  00000020  F7 E3	     1		MUL		EBX
- 00000022  BE 00000236 R     1		MOV		ESI, OFFSET validatedNums
+ 00000022  BE 00000238 R     1		MOV		ESI, OFFSET validatedNums
  00000027  03 F0	     1		ADD		ESI, EAX
  00000029  6A 0F	     1		PUSH	MAXBUFFERSIZE
  0000002B  56		     1		PUSH	ESI
  0000002C  68 80000000	     1		PUSH	MINVALIDVAL
  00000031  68 7FFFFFFF	     1		PUSH	MAXVALIDVAL
- 00000036  68 00000190 R     1		PUSH	OFFSET errorMessage
- 0000003B  68 00000232 R     1		PUSH	OFFSET isNumberValid
- 00000040  68 00000171 R     1		PUSH	OFFSET numberPrompt
- 00000045  68 0000021F R     1		PUSH	OFFSET buffer
- 0000004A  68 0000022E R     1		PUSH	OFFSET bufferSize
+ 00000036  68 00000192 R     1		PUSH	OFFSET errorMessage
+ 0000003B  68 00000234 R     1		PUSH	OFFSET isNumberValid
+ 00000040  68 00000173 R     1		PUSH	OFFSET numberPrompt
+ 00000045  68 00000221 R     1		PUSH	OFFSET buffer
+ 0000004A  68 00000230 R     1		PUSH	OFFSET bufferSize
  0000004F  E8 00000064	     1		CALL	ReadVal
  00000054  E2 BC	     1		LOOP _GetValue
  00000056  61		     1		POPAD
@@ -453,7 +436,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
 					; Write values to console
 					mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
  00000057  60		     1		PUSHAD
- 00000058  BA 00000200 R     1		MOV		EDX, OFFSET resultPrompt1
+ 00000058  BA 00000202 R     1		MOV		EDX, OFFSET resultPrompt1
  0000005D  E8 00000000 E     1		CALL	WriteString
  00000062  B9 0000000A	     1		MOV		ECX, NUMCOUNT
  00000067		     1	_WriteValue:
@@ -462,7 +445,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
  0000006E  2B C3	     1		SUB		EAX, EBX
  00000070  BB 00000004	     1		MOV		EBX, 4
  00000075  F7 E3	     1		MUL		EBX
- 00000077  BE 00000236 R     1		MOV		ESI, OFFSET validatedNums
+ 00000077  BE 00000238 R     1		MOV		ESI, OFFSET validatedNums
  0000007C  03 F0	     1		ADD		ESI, EAX
  0000007E  83 F9 0A	     1		CMP		ECX, NUMCOUNT
  00000081  74 0E	     1		JZ		_ShowNumber
@@ -472,14 +455,14 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
  0000008C  E8 00000000 E     1		CALL	WriteChar
  00000091		     1	_ShowNumber:
  00000091  FF 36	     1		PUSH	[ESI]
- 00000093  68 0000021F R     1		PUSH	OFFSET buffer
- 00000098  68 0000022E R     1		PUSH	OFFSET bufferSize
+ 00000093  68 00000221 R     1		PUSH	OFFSET buffer
+ 00000098  68 00000230 R     1		PUSH	OFFSET bufferSize
  0000009D  E8 0000013E	     1		CALL	WriteVal
  000000A2  E2 C3	     1		LOOP _WriteValue
  000000A4  61		     1		POPAD
 
 					; Say goodbye to the user
-					mShowMessage goodbyeMessage
+					mShowMessage OFFSET goodbyeMessage
  000000A5  52		     1		PUSH	EDX
  000000A6  BA 00000132 R     1		MOV		EDX, OFFSET goodbyeMessage
  000000AB  E8 00000000 E     1		CALL	WriteString
@@ -560,7 +543,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
  000000E7  8A 06			MOV			AL, [ESI]
  000000E9  3C 01			CMP			AL, 1
  000000EB  74 0C			JZ			_CheckNumberSize
-					mShowErrorMessage [EBP+24]
+					mShowMessage [EBP+24]
  000000ED  52		     1		PUSH	EDX
  000000EE  8B 55 18	     1		MOV		EDX, [EBP+24]
  000000F1  E8 00000000 E     1		CALL	WriteString
@@ -583,7 +566,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
  00000113  8A 06			MOV			AL, [ESI]
  00000115  3C 01			CMP			AL, 1
  00000117  74 0C			JZ			_DoneReadingValue
-					mShowErrorMessage [EBP+24]
+					mShowMessage [EBP+24]
  00000119  52		     1		PUSH	EDX
  0000011A  8B 55 18	     1		MOV		EDX, [EBP+24]
  0000011D  E8 00000000 E     1		CALL	WriteString
@@ -874,7 +857,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
  00000243			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:45:55
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -887,7 +870,6 @@ Macros:
 mDisplayString . . . . . . . . .	Proc
 mGetString . . . . . . . . . . .	Proc
 mGetValues . . . . . . . . . . .	Proc
-mShowErrorMessage  . . . . . . .	Proc
 mShowMessage . . . . . . . . . .	Proc
 mWriteValues . . . . . . . . . .	Proc
 
@@ -980,7 +962,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000025E Para	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000260 Para	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 00000243 Para	  Public  'CODE'	
 
 
@@ -1346,16 +1328,16 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bufferSize . . . . . . . . . . .	DWord	 0000022E _DATA	
-buffer . . . . . . . . . . . . .	Byte	 0000021F _DATA	
+bufferSize . . . . . . . . . . .	DWord	 00000230 _DATA	
+buffer . . . . . . . . . . . . .	Byte	 00000221 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-errorMessage . . . . . . . . . .	Byte	 00000190 _DATA	
+errorMessage . . . . . . . . . .	Byte	 00000192 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 goodbyeMessage . . . . . . . . .	Byte	 00000132 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 introMessage . . . . . . . . . .	Byte	 00000000 _DATA	
-isNumberValid  . . . . . . . . .	DWord	 00000232 _DATA	
+isNumberValid  . . . . . . . . .	DWord	 00000234 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -1363,10 +1345,10 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numberPrompt . . . . . . . . . .	Byte	 00000171 _DATA	
+numberPrompt . . . . . . . . . .	Byte	 00000173 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-resultPrompt1  . . . . . . . . .	Byte	 00000200 _DATA	
-validatedNums  . . . . . . . . .	DWord	 00000236 _DATA	
+resultPrompt1  . . . . . . . . .	Byte	 00000202 _DATA	
+validatedNums  . . . . . . . . .	DWord	 00000238 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
