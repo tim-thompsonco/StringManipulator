@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:18:10
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:20:25
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -109,18 +109,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:18:10
 					CALL	WriteChar
 
 				_BeginNumberDisplay:
-
 					; Number has been stored in buffer in reverse, so we walk backwards through string of digits
 					MOV		ESI, outputBuffer
 					STD
 					MOVZX	ECX, outputBufferLength
 
 				_DisplayNumber:
-
 					LODSB
 					CALL	WriteChar
 
-					LOOP _DisplayNumber
+					LOOP	_DisplayNumber
 
 					POPAD
 				ENDM
@@ -285,7 +283,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:18:10
  00000047  68 00000230 R		PUSH	OFFSET bufferSize
  0000004C  E8 00000070			CALL	ReadVal
 
- 00000051  E2 BC			LOOP _GetValue
+ 00000051  E2 BC			LOOP	_GetValue
 
 					; Notify user that they have entered numbers which are about to be written
  00000053  68 00000202 R		PUSH	OFFSET resultPrompt1
@@ -318,13 +316,13 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:18:10
  00000093  68 00000230 R		PUSH	OFFSET bufferSize
  00000098  E8 00000148			CALL	WriteVal
 
- 0000009D  E2 C3			LOOP _WriteValue
+ 0000009D  E2 C3			LOOP	_WriteValue
 
 					; Say goodbye to the user
  0000009F  68 00000132 R		PUSH	OFFSET goodbyeMessage
  000000A4  E8 00000007			CALL	ShowMessage
 
-					Invoke ExitProcess,0	; Exit to operating system
+					Invoke	ExitProcess,0	; Exit to operating system
  000000A9  6A 00	   *	    push   +000000000h
  000000AB  E8 00000000 E   *	    call   ExitProcess
  000000B0			main ENDP
@@ -719,7 +717,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:18:10
  0000023A		     1	_DisplayNumber:
  0000023A  AC		     1		LODSB
  0000023B  E8 00000000 E     1		CALL	WriteChar
- 00000240  E2 F8	     1		LOOP _DisplayNumber
+ 00000240  E2 F8	     1		LOOP	_DisplayNumber
  00000242  61		     1		POPAD
 
  00000243  61				POPAD
@@ -728,7 +726,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:18:10
  00000248			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:18:10
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:20:25
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 

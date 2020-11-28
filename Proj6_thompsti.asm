@@ -88,18 +88,16 @@ mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ, numIsNegative:REQ
 	CALL	WriteChar
 
 _BeginNumberDisplay:
-
 	; Number has been stored in buffer in reverse, so we walk backwards through string of digits
 	MOV		ESI, outputBuffer
 	STD
 	MOVZX	ECX, outputBufferLength
 
 _DisplayNumber:
-
 	LODSB
 	CALL	WriteChar
 
-	LOOP _DisplayNumber
+	LOOP	_DisplayNumber
 
 	POPAD
 ENDM
@@ -155,7 +153,7 @@ _GetValue:
 	PUSH	OFFSET bufferSize
 	CALL	ReadVal
 
-	LOOP _GetValue
+	LOOP	_GetValue
 
 	; Notify user that they have entered numbers which are about to be written
 	PUSH	OFFSET resultPrompt1
@@ -188,13 +186,13 @@ _ShowNumber:
 	PUSH	OFFSET bufferSize
 	CALL	WriteVal
 
-	LOOP _WriteValue
+	LOOP	_WriteValue
 
 	; Say goodbye to the user
 	PUSH	OFFSET goodbyeMessage
 	CALL	ShowMessage
 
-	Invoke ExitProcess,0	; Exit to operating system
+	Invoke	ExitProcess,0	; Exit to operating system
 main ENDP
 
 ; ---------------------------------------------------------------------
