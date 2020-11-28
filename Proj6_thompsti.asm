@@ -63,35 +63,24 @@ ENDM
 ; Reads string of ASCII digits in buffer and then displays the string
 ; to the console.
 ;
-; Preconditions:	outputBuffer is an address pointing to the end of a
-;					BYTE array containing the string of ASCII digits to
-;					display. outputBufferLength contains the number of
-;					characters in the ASCII string.
+; Preconditions:	outputBuffer is an address pointing to a BYTE array
+;					containing the string of ASCII digits to display.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
-;		outputBuffer = address of end of array containing string of digits.
-;		outputBufferLength = value of length of outputBuffer.
+;		outputBuffer = address of array containing string of digits.
 ;
 ; Returns: None.
 ; ---------------------------------------------------------------------
-mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ
-	PUSHAD
+mDisplayString	MACRO outputBuffer:REQ
+	PUSH	EDX
 
-_BeginNumberDisplay:
-	; Number has been stored in buffer in reverse, so we walk backwards through string of digits
-	MOV		ESI, outputBuffer
-	STD
-	MOVZX	ECX, outputBufferLength
+	; Display number
+	MOV		EDX, outputBuffer
+	CALL	WriteString
 
-_DisplayDigit:
-	LODSB
-	CALL	WriteChar
-
-	LOOP	_DisplayDigit
-
-	POPAD
+	POP		EDX
 ENDM
 
 	MINVALIDVAL = -2147483648
@@ -512,8 +501,6 @@ ValidateNumber ENDP
 WriteVal PROC
 	LOCAL	numToWrite:SDWORD
 	LOCAL	numIsNegative:BYTE
-	LOCAL	numLength:BYTE
-	MOV		numLength, 0
 	PUSHAD
 
 	MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
@@ -540,7 +527,6 @@ _ConvertNumber:
 	MOV		AL, DL
 	ADD		AL, 48					; Convert back to ASCII character for number
 	STOSB
-	INC		BYTE PTR numLength
 	POP		EAX
 	MOV		numToWrite, EAX
 	CMP		EAX, 0
@@ -551,17 +537,83 @@ _ConvertNumber:
 	JNZ		_ConversionDone
 	MOV		AL, '-'
 	STOSB
-	INC		BYTE PTR numLength
 
 _ConversionDone:
-	; Since STOSB increments to next address, get back to last digit
-	DEC		EDI
+	; Add null terminator to end of string to complete it
+	MOV		AL, 0
+	STOSB
+
+	; Number is populated as string of ASCII digits in reverse, so we
+	; reverse the string to get the string to be displayed
+	MOV		ESI, [EBP+8]
+	PUSH	[ESI]
+	PUSH	[EBP+12]
+	CALL	ReverseString
 
 	; Display number to console
-	mDisplayString EDI, numLength
+	MOV		ESI, [EBP+12]
+	mDisplayString ESI
 
 	POPAD
 	RET		12
 WriteVal ENDP
+
+; ---------------------------------------------------------------------
+; Name: ReverseString
+;
+; Reverses a string of ASCII digits that represents a number.
+;
+; Preconditions:	Buffer is a BYTE array and buffer size is a DWORD.
+;					Buffer contains a string of ASCII digits which
+;					represents a number. Buffer size contains the
+;					length of the string, which includes any sign.
+;
+; Postconditions: None.
+;
+; Receives:
+;		[EBP+8] = address of buffer for user input.
+;		[EBP+12] = value of buffer size for user input.
+;
+; Returns:
+;		Reversed string of ASCII digits representing a number.
+; ---------------------------------------------------------------------
+ReverseString PROC
+	PUSH	EBP
+	MOV		EBP, ESP
+	PUSHAD
+
+	; To reverse the string in place, we use the two pointer technique
+	MOV		EDI, [EBP+8]
+	MOV		ESI, [EBP+8]
+
+	; EDI will track the beginning of the array, ESI tracks the end
+	ADD		ESI, [EBP+12]
+	DEC		ESI
+
+	; To reverse the string, we will iterate through half the string
+	MOV		EAX, [EBP+12]
+	MOV		EBX, 2
+	CDQ
+	DIV		EBX
+	MOV		ECX, EAX
+_ReverseDigits:
+	; For each iteration, the first and last numbers are replaced
+	MOV		BYTE PTR AL, [EDI]
+	MOV		BYTE PTR AH, [ESI]
+	MOV		[EDI], BYTE PTR AH
+	MOV		[ESI], BYTE PTR AL
+
+	; The front of the array (EDI) is then incremented by one
+	INC		EDI
+
+	; The back of the array (ESI) is then decremented by one
+	DEC		ESI
+
+	LOOP	_ReverseDigits
+	
+	POPAD
+	POP		EBP
+	RET		8
+ReverseString ENDP
 
 END main

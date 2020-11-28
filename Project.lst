@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:56:08
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 15:58:54
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -84,35 +84,24 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:56:08
 				; Reads string of ASCII digits in buffer and then displays the string
 				; to the console.
 				;
-				; Preconditions:	outputBuffer is an address pointing to the end of a
-				;					BYTE array containing the string of ASCII digits to
-				;					display. outputBufferLength contains the number of
-				;					characters in the ASCII string.
+				; Preconditions:	outputBuffer is an address pointing to a BYTE array
+				;					containing the string of ASCII digits to display.
 				;
 				; Postconditions: None.
 				;
 				; Receives:
-				;		outputBuffer = address of end of array containing string of digits.
-				;		outputBufferLength = value of length of outputBuffer.
+				;		outputBuffer = address of array containing string of digits.
 				;
 				; Returns: None.
 				; ---------------------------------------------------------------------
-				mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ
-					PUSHAD
+				mDisplayString	MACRO outputBuffer:REQ
+					PUSH	EDX
 
-				_BeginNumberDisplay:
-					; Number has been stored in buffer in reverse, so we walk backwards through string of digits
-					MOV		ESI, outputBuffer
-					STD
-					MOVZX	ECX, outputBufferLength
+					; Display number
+					MOV		EDX, outputBuffer
+					CALL	WriteString
 
-				_DisplayDigit:
-					LODSB
-					CALL	WriteChar
-
-					LOOP	_DisplayDigit
-
-					POPAD
+					POP		EDX
 				ENDM
 
  =-80000000				MINVALIDVAL = -2147483648
@@ -239,7 +228,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:56:08
 	    00
 	   ]
  00000230 00000000			bufferSize		DWORD	0
- 00000234 00000000	isNumberValid	DWORD	0
+ 00000234 00000000			isNumberValid	DWORD	0
  00000238  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
@@ -656,74 +645,131 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:56:08
  000001E5			WriteVal PROC
 					LOCAL	numToWrite:SDWORD
 					LOCAL	numIsNegative:BYTE
-					LOCAL	numLength:BYTE
  000001E5  55		   *	    push   ebp
  000001E6  8B EC	   *	    mov    ebp, esp
  000001E8  83 C4 F8	   *	    add    esp, 0FFFFFFF8h
- 000001EB  C6 45 FA 00			MOV		numLength, 0
- 000001EF  60				PUSHAD
+ 000001EB  60				PUSHAD
 
- 000001F0  8B 7D 0C			MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
- 000001F3  8B 45 10			MOV		EAX, [EBP+16]			; Value of number to be converted
- 000001F6  FC				CLD
+ 000001EC  8B 7D 0C			MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
+ 000001EF  8B 45 10			MOV		EAX, [EBP+16]			; Value of number to be converted
+ 000001F2  FC				CLD
 
 					; Store number in local variable since EAX/EDX will be used for division
- 000001F7  89 45 FC			MOV		numToWrite, EAX
+ 000001F3  89 45 FC			MOV		numToWrite, EAX
 
 					; Check number, and if negative, set numIsNegative boolean to true
- 000001FA  83 F8 00			CMP		EAX, 0
- 000001FD  7D 08			JGE		_ConvertNumber
- 000001FF  F7 D8			NEG		EAX
- 00000201  FE 45 FB			INC		BYTE PTR numIsNegative
- 00000204  89 45 FC			MOV		numToWrite, EAX			; If negative, update numToWrite so value is positive
+ 000001F6  83 F8 00			CMP		EAX, 0
+ 000001F9  7D 08			JGE		_ConvertNumber
+ 000001FB  F7 D8			NEG		EAX
+ 000001FD  FE 45 FB			INC		BYTE PTR numIsNegative
+ 00000200  89 45 FC			MOV		numToWrite, EAX			; If negative, update numToWrite so value is positive
 
- 00000207			_ConvertNumber:
+ 00000203			_ConvertNumber:
 					; Strip off last digit using division and store in buffer
- 00000207  8B 45 FC			MOV		EAX, numToWrite
- 0000020A  BB 0000000A			MOV		EBX, 10
- 0000020F  99				CDQ
- 00000210  F7 F3			DIV		EBX
- 00000212  50				PUSH	EAX
- 00000213  8A C2			MOV		AL, DL
- 00000215  04 30			ADD		AL, 48					; Convert back to ASCII character for number
- 00000217  AA				STOSB
- 00000218  FE 45 FA			INC		BYTE PTR numLength
- 0000021B  58				POP		EAX
- 0000021C  89 45 FC			MOV		numToWrite, EAX
- 0000021F  83 F8 00			CMP		EAX, 0
- 00000222  75 E3			JNZ		_ConvertNumber
+ 00000203  8B 45 FC			MOV		EAX, numToWrite
+ 00000206  BB 0000000A			MOV		EBX, 10
+ 0000020B  99				CDQ
+ 0000020C  F7 F3			DIV		EBX
+ 0000020E  50				PUSH	EAX
+ 0000020F  8A C2			MOV		AL, DL
+ 00000211  04 30			ADD		AL, 48					; Convert back to ASCII character for number
+ 00000213  AA				STOSB
+ 00000214  58				POP		EAX
+ 00000215  89 45 FC			MOV		numToWrite, EAX
+ 00000218  83 F8 00			CMP		EAX, 0
+ 0000021B  75 E6			JNZ		_ConvertNumber
 
 					; Check if number is negative, and if so, add sign to end of string
- 00000224  80 7D FB 01			CMP		numIsNegative, 1
- 00000228  75 06			JNZ		_ConversionDone
- 0000022A  B0 2D			MOV		AL, '-'
- 0000022C  AA				STOSB
- 0000022D  FE 45 FA			INC		BYTE PTR numLength
+ 0000021D  80 7D FB 01			CMP		numIsNegative, 1
+ 00000221  75 03			JNZ		_ConversionDone
+ 00000223  B0 2D			MOV		AL, '-'
+ 00000225  AA				STOSB
 
- 00000230			_ConversionDone:
-					; Since STOSB increments to next address, get back to last digit
- 00000230  4F				DEC		EDI
+ 00000226			_ConversionDone:
+					; Add null terminator to end of string to complete it
+ 00000226  B0 00			MOV		AL, 0
+ 00000228  AA				STOSB
+
+					; Number is populated as string of ASCII digits in reverse, so we
+					; reverse the string to get the string to be displayed
+ 00000229  8B 75 08			MOV		ESI, [EBP+8]
+ 0000022C  FF 36			PUSH	[ESI]
+ 0000022E  FF 75 0C			PUSH	[EBP+12]
+ 00000231  E8 00000011			CALL	ReverseString
 
 					; Display number to console
-					mDisplayString EDI, numLength
- 00000231  60		     1		PUSHAD
- 00000232		     1	_BeginNumberDisplay:
- 00000232  8B F7	     1		MOV		ESI, EDI
- 00000234  FD		     1		STD
- 00000235  0F B6 4D FA	     1		MOVZX	ECX, numLength
- 00000239		     1	_DisplayDigit:
- 00000239  AC		     1		LODSB
- 0000023A  E8 00000000 E     1		CALL	WriteChar
- 0000023F  E2 F8	     1		LOOP	_DisplayDigit
- 00000241  61		     1		POPAD
+ 00000236  8B 75 0C			MOV		ESI, [EBP+12]
+					mDisplayString ESI
+ 00000239  52		     1		PUSH	EDX
+ 0000023A  8B D6	     1		MOV		EDX, ESI
+ 0000023C  E8 00000000 E     1		CALL	WriteString
+ 00000241  5A		     1		POP		EDX
 
  00000242  61				POPAD
  00000243  C9		   *	    leave  
  00000244  C2 000C			RET		12
  00000247			WriteVal ENDP
 
+				; ---------------------------------------------------------------------
+				; Name: ReverseString
+				;
+				; Reverses a string of ASCII digits that represents a number.
+				;
+				; Preconditions:	Buffer is a BYTE array and buffer size is a DWORD.
+				;					Buffer contains a string of ASCII digits which
+				;					represents a number. Buffer size contains the
+				;					length of the string, which includes any sign.
+				;
+				; Postconditions: None.
+				;
+				; Receives:
+				;		[EBP+8] = address of buffer for user input.
+				;		[EBP+12] = value of buffer size for user input.
+				;
+				; Returns:
+				;		Reversed string of ASCII digits representing a number.
+				; ---------------------------------------------------------------------
+ 00000247			ReverseString PROC
+ 00000247  55				PUSH	EBP
+ 00000248  8B EC			MOV		EBP, ESP
+ 0000024A  60				PUSHAD
+
+					; To reverse the string in place, we use the two pointer technique
+ 0000024B  8B 7D 08			MOV		EDI, [EBP+8]
+ 0000024E  8B 75 08			MOV		ESI, [EBP+8]
+
+					; EDI will track the beginning of the array, ESI tracks the end
+ 00000251  03 75 0C			ADD		ESI, [EBP+12]
+ 00000254  4E				DEC		ESI
+
+					; To reverse the string, we will iterate through half the string
+ 00000255  8B 45 0C			MOV		EAX, [EBP+12]
+ 00000258  BB 00000002			MOV		EBX, 2
+ 0000025D  99				CDQ
+ 0000025E  F7 F3			DIV		EBX
+ 00000260  8B C8			MOV		ECX, EAX
+ 00000262			_ReverseDigits:
+					; For each iteration, the first and last numbers are replaced
+ 00000262  8A 07			MOV		BYTE PTR AL, [EDI]
+ 00000264  8A 26			MOV		BYTE PTR AH, [ESI]
+ 00000266  88 27			MOV		[EDI], BYTE PTR AH
+ 00000268  88 06			MOV		[ESI], BYTE PTR AL
+
+					; The front of the array (EDI) is then incremented by one
+ 0000026A  47				INC		EDI
+
+					; The back of the array (ESI) is then decremented by one
+ 0000026B  4E				DEC		ESI
+
+ 0000026C  E2 F4			LOOP	_ReverseDigits
+					
+ 0000026E  61				POPAD
+ 0000026F  5D				POP		EBP
+ 00000270  C2 0008			RET		8
+ 00000273			ReverseString ENDP
+
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 14:56:08
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 15:58:54
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -826,7 +872,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000260 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000247 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000273 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -900,6 +946,8 @@ ReadVal  . . . . . . . . . . . .	P Near	 000000C1 _TEXT	Length= 0000006E Public 
   _GetNumber . . . . . . . . . .	L Near	 000000C8 _TEXT	
   _CheckNumberSize . . . . . . .	L Near	 00000100 _TEXT	
   _DoneReadingValue  . . . . . .	L Near	 0000012A _TEXT	
+ReverseString  . . . . . . . . .	P Near	 00000247 _TEXT	Length= 0000002C Public STDCALL
+  _ReverseDigits . . . . . . . .	L Near	 00000262 _TEXT	
 SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -958,11 +1006,8 @@ WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteVal . . . . . . . . . . . .	P Near	 000001E5 _TEXT	Length= 00000062 Public STDCALL
   numToWrite . . . . . . . . . .	DWord	 bp - 00000004
   numIsNegative  . . . . . . . .	Byte	 bp - 00000005
-  numLength  . . . . . . . . . .	Byte	 bp - 00000006
-  _ConvertNumber . . . . . . . .	L Near	 00000207 _TEXT	
-  _ConversionDone  . . . . . . .	L Near	 00000230 _TEXT	
-  _BeginNumberDisplay  . . . . .	L Near	 00000232 _TEXT	
-  _DisplayDigit  . . . . . . . .	L Near	 00000239 _TEXT	
+  _ConvertNumber . . . . . . . .	L Near	 00000203 _TEXT	
+  _ConversionDone  . . . . . . .	L Near	 00000226 _TEXT	
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000B0 Public STDCALL
   _GetValue  . . . . . . . . . .	L Near	 0000000F _TEXT	
