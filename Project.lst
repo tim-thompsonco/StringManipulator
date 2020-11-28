@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:39:07
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -137,24 +137,6 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:39:07
 					PUSH	EDX
 
 					MOV		EDX, OFFSET message
-					CALL	WriteString
-
-					POP		EDX
-				ENDM
-
-				; ---------------------------------------------------------------------
-				; Name: mShowGoodbye
-				;
-				; Displays a goodbye message to the user.
-				;
-				; Receives:
-				;		goodbyeMessage = reference to address of goodbye message.
-				; ---------------------------------------------------------------------
-				mShowGoodbye	MACRO goodbyeMessage:REQ
-					PUSH	EDX
-
-					; Display goodbye message to user
-					MOV		EDX, OFFSET goodbyeMessage
 					CALL	WriteString
 
 					POP		EDX
@@ -497,7 +479,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:39:07
  000000A4  61		     1		POPAD
 
 					; Say goodbye to the user
-					mShowGoodbye goodbyeMessage
+					mShowMessage goodbyeMessage
  000000A5  52		     1		PUSH	EDX
  000000A6  BA 00000132 R     1		MOV		EDX, OFFSET goodbyeMessage
  000000AB  E8 00000000 E     1		CALL	WriteString
@@ -892,7 +874,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:39:07
  00000243			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:39:07
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 12:42:35
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -906,7 +888,6 @@ mDisplayString . . . . . . . . .	Proc
 mGetString . . . . . . . . . . .	Proc
 mGetValues . . . . . . . . . . .	Proc
 mShowErrorMessage  . . . . . . .	Proc
-mShowGoodbye . . . . . . . . . .	Proc
 mShowMessage . . . . . . . . . .	Proc
 mWriteValues . . . . . . . . . .	Proc
 

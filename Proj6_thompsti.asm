@@ -122,24 +122,6 @@ mShowMessage	MACRO message:REQ
 ENDM
 
 ; ---------------------------------------------------------------------
-; Name: mShowGoodbye
-;
-; Displays a goodbye message to the user.
-;
-; Receives:
-;		goodbyeMessage = reference to address of goodbye message.
-; ---------------------------------------------------------------------
-mShowGoodbye	MACRO goodbyeMessage:REQ
-	PUSH	EDX
-
-	; Display goodbye message to user
-	MOV		EDX, OFFSET goodbyeMessage
-	CALL	WriteString
-
-	POP		EDX
-ENDM
-
-; ---------------------------------------------------------------------
 ; Name: mShowErrorMessage
 ;
 ; Displays an error message to the console.
@@ -294,7 +276,7 @@ ENDM
 					BYTE	"Please provide 10 signed decimal integers.",13,10
 					BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
-	goodbyeMessage	BYTE	13,10,13,10,"So long and thanks for all the knowledge! Wonderful class.",0
+	goodbyeMessage	BYTE	13,10,13,10,"So long and thanks for all the knowledge! Wonderful class.",13,10,0
 	numberPrompt	BYTE	"Please enter a signed number: ",0
 	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
@@ -316,7 +298,7 @@ main PROC
 	mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
 
 	; Say goodbye to the user
-	mShowGoodbye goodbyeMessage
+	mShowMessage goodbyeMessage
 
 	Invoke ExitProcess,0	; Exit to operating system
 main ENDP
