@@ -56,6 +56,54 @@ mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
 ENDM
 
 ; ---------------------------------------------------------------------
+; Name: mDisplayString
+;
+; Reads string of ASCII digits in buffer and then displays the string
+; to the console.
+;
+; Preconditions:	Prompt is initialized and is a BYTE array containing
+;					the user prompt to display. userInput is initialized
+;					and is a BYTE array. userInputLength is initialized
+;					and is a DWORD.
+;
+; Postconditions: None.
+;
+; Receives:
+;		prompt = address of user prompt to display
+;		userInput = address of buffer array to store user input
+;		userInputLength = address of buffer size to store input length
+;
+; Returns:
+;		userInput contains string of number entered by user.
+;		userInputLength contains length of string entered by user.
+; ---------------------------------------------------------------------
+mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ, numIsNegative:REQ
+	PUSHAD
+
+	; Check if number is negative, and if so, display sign
+	CMP		numIsNegative, 1
+	JNZ		_BeginNumberDisplay
+	MOV		AL, '-'
+	CALL	WriteChar
+
+_BeginNumberDisplay:
+
+	; Number has been stored in buffer in reverse, so we walk backwards through string of digits
+	MOV		ESI, outputBuffer
+	STD
+	MOVZX	ECX, outputBufferLength
+
+_DisplayNumber:
+
+	LODSB
+	CALL	WriteChar
+
+	LOOP _DisplayNumber
+
+	POPAD
+ENDM
+
+; ---------------------------------------------------------------------
 ; Name: mShowIntroduction
 ;
 ; Displays an introduction message with author name to the user and
@@ -612,26 +660,12 @@ _ConvertNumber:
 	CMP		EAX, 0
 	JNZ		_ConvertNumber
 
-	; Check if number is negative, and if so, display sign
-	CMP		numIsNegative, 1
-	JNZ		_BeginNumberDisplay
-	MOV		AL, '-'
-	CALL	WriteChar
+	; Since STOSB increments to next address, get back to last digit
+	DEC		EDI
 
-_BeginNumberDisplay:
+	; Display number to console
+	mDisplayString EDI, numLength, numIsNegative
 
-	; Number has been stored in buffer in reverse, so we walk backwards through string of digits
-	MOV		ESI, EDI
-	DEC		ESI						; Since STOSB increments to next address, get back to end of number
-	STD
-	MOVZX	ECX, numLength
-
-_DisplayNumber:
-	LODSB
-	CALL	WriteChar
-
-	LOOP _DisplayNumber
-	
 	POPAD
 	RET		12
 WriteVal ENDP

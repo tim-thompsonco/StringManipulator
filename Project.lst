@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:39:21
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -72,6 +72,54 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 
 					; Store size of user input
 					MOV		[userInputLength], EAX
+
+					POPAD
+				ENDM
+
+				; ---------------------------------------------------------------------
+				; Name: mDisplayString
+				;
+				; Reads string of ASCII digits in buffer and then displays the string
+				; to the console.
+				;
+				; Preconditions:	Prompt is initialized and is a BYTE array containing
+				;					the user prompt to display. userInput is initialized
+				;					and is a BYTE array. userInputLength is initialized
+				;					and is a DWORD.
+				;
+				; Postconditions: None.
+				;
+				; Receives:
+				;		prompt = address of user prompt to display
+				;		userInput = address of buffer array to store user input
+				;		userInputLength = address of buffer size to store input length
+				;
+				; Returns:
+				;		userInput contains string of number entered by user.
+				;		userInputLength contains length of string entered by user.
+				; ---------------------------------------------------------------------
+				mDisplayString	MACRO outputBuffer:REQ, outputBufferLength:REQ, numIsNegative:REQ
+					PUSHAD
+
+					; Check if number is negative, and if so, display sign
+					CMP		numIsNegative, 1
+					JNZ		_BeginNumberDisplay
+					MOV		AL, '-'
+					CALL	WriteChar
+
+				_BeginNumberDisplay:
+
+					; Number has been stored in buffer in reverse, so we walk backwards through string of digits
+					MOV		ESI, outputBuffer
+					STD
+					MOVZX	ECX, outputBufferLength
+
+				_DisplayNumber:
+
+					LODSB
+					CALL	WriteChar
+
+					LOOP _DisplayNumber
 
 					POPAD
 				ENDM
@@ -280,20 +328,20 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 	   20 54 68 6F 6D
 	   70 73 6F 6E 0D
 	   0A 0D 0A 00
- 00000040 0D 0A 53 6F 20		goodbyeMessage	BYTE	13,10,"So long and thanks for all the knowledge! Wonderful class.",0
-	   6C 6F 6E 67 20
-	   61 6E 64 20 74
-	   68 61 6E 6B 73
-	   20 66 6F 72 20
-	   61 6C 6C 20 74
-	   68 65 20 6B 6E
-	   6F 77 6C 65 64
-	   67 65 21 20 57
-	   6F 6E 64 65 72
-	   66 75 6C 20 63
-	   6C 61 73 73 2E
-	   00
- 0000007D 50 6C 65 61 73		instructions	BYTE	"Please provide 10 signed decimal integers.",13,10
+ 00000040 0D 0A 0D 0A 53		goodbyeMessage	BYTE	13,10,13,10,"So long and thanks for all the knowledge! Wonderful class.",0
+	   6F 20 6C 6F 6E
+	   67 20 61 6E 64
+	   20 74 68 61 6E
+	   6B 73 20 66 6F
+	   72 20 61 6C 6C
+	   20 74 68 65 20
+	   6B 6E 6F 77 6C
+	   65 64 67 65 21
+	   20 57 6F 6E 64
+	   65 72 66 75 6C
+	   20 63 6C 61 73
+	   73 2E 00
+ 0000007F 50 6C 65 61 73		instructions	BYTE	"Please provide 10 signed decimal integers.",13,10
 	   65 20 70 72 6F
 	   76 69 64 65 20
 	   31 30 20 73 69
@@ -302,7 +350,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 	   61 6C 20 69 6E
 	   74 65 67 65 72
 	   73 2E 0D 0A
- 000000A9  45 61 63 68 20						BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
+ 000000AB  45 61 63 68 20						BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
 	   6E 75 6D 62 65
 	   72 20 6E 65 65
 	   64 73 20 74 6F
@@ -323,7 +371,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 	   65 64 20 65 6E
 	   74 65 72 69 6E
 	   67 0D 0A
- 00000110  74 68 65 20 72						BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
+ 00000112  74 68 65 20 72						BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
 	   61 77 20 6E 75
 	   6D 62 65 72 73
 	   2C 20 49 20 77
@@ -343,14 +391,14 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 	   76 61 6C 75 65
 	   2E 0D 0A 0D 0A
 	   00
- 00000170 50 6C 65 61 73		numberPrompt	BYTE	"Please enter a signed number: ",0
+ 00000172 50 6C 65 61 73		numberPrompt	BYTE	"Please enter a signed number: ",0
 	   65 20 65 6E 74
 	   65 72 20 61 20
 	   73 69 67 6E 65
 	   64 20 6E 75 6D
 	   62 65 72 3A 20
 	   00
- 0000018F 45 52 52 4F 52		errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
+ 00000191 45 52 52 4F 52		errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	   3A 20 59 6F 75
 	   72 20 6E 75 6D
 	   62 65 72 20 77
@@ -373,19 +421,19 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 	   72 79 20 61 67
 	   61 69 6E 2E 0D
 	   0A 00
- 000001FF 0D 0A 59 6F 75		resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
+ 00000201 0D 0A 59 6F 75		resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
 	   20 65 6E 74 65
 	   72 65 64 20 74
 	   68 65 73 65 20
 	   6E 75 6D 62 65
 	   72 73 3A 0D 0A
 	   00
- 0000021E  0000000B [			buffer			BYTE	MAXBUFFERSIZE DUP(?)
+ 00000220  0000000B [			buffer			BYTE	MAXBUFFERSIZE DUP(?)
 	    00
 	   ]
- 00000229 00000000			bufferSize		DWORD	0
- 0000022D 00000000			isNumberValid	DWORD	0
- 00000231  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
+ 0000022B 00000000			bufferSize		DWORD	0
+ 0000022F 00000000			isNumberValid	DWORD	0
+ 00000233  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
 
@@ -397,7 +445,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
  00000000  52		     1		PUSH	EDX
  00000001  BA 00000000 R     1		MOV		EDX, OFFSET introMessage
  00000006  E8 00000000 E     1		CALL	WriteString
- 0000000B  BA 0000007D R     1		MOV		EDX, OFFSET instructions
+ 0000000B  BA 0000007F R     1		MOV		EDX, OFFSET instructions
  00000010  E8 00000000 E     1		CALL	WriteString
  00000015  5A		     1		POP		EDX
 
@@ -411,16 +459,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
  00000023  2B C3	     1		SUB		EAX, EBX
  00000025  BB 00000004	     1		MOV		EBX, 4
  0000002A  F7 E3	     1		MUL		EBX
- 0000002C  BE 00000231 R     1		MOV		ESI, OFFSET validatedNums
+ 0000002C  BE 00000233 R     1		MOV		ESI, OFFSET validatedNums
  00000031  03 F0	     1		ADD		ESI, EAX
  00000033  56		     1		PUSH	ESI
  00000034  68 80000000	     1		PUSH	MINVALIDVAL
  00000039  68 7FFFFFFF	     1		PUSH	MAXVALIDVAL
- 0000003E  68 0000018F R     1		PUSH	OFFSET errorMessage
- 00000043  68 0000022D R     1		PUSH	OFFSET isNumberValid
- 00000048  68 00000170 R     1		PUSH	OFFSET numberPrompt
- 0000004D  68 0000021E R     1		PUSH	OFFSET buffer
- 00000052  68 00000229 R     1		PUSH	OFFSET bufferSize
+ 0000003E  68 00000191 R     1		PUSH	OFFSET errorMessage
+ 00000043  68 0000022F R     1		PUSH	OFFSET isNumberValid
+ 00000048  68 00000172 R     1		PUSH	OFFSET numberPrompt
+ 0000004D  68 00000220 R     1		PUSH	OFFSET buffer
+ 00000052  68 0000022B R     1		PUSH	OFFSET bufferSize
  00000057  E8 00000064	     1		CALL	ReadVal
  0000005C  E2 BE	     1		LOOP _GetValue
  0000005E  61		     1		POPAD
@@ -428,7 +476,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
 					; Write values to console
 					mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
  0000005F  60		     1		PUSHAD
- 00000060  BA 000001FF R     1		MOV		EDX, OFFSET resultPrompt1
+ 00000060  BA 00000201 R     1		MOV		EDX, OFFSET resultPrompt1
  00000065  E8 00000000 E     1		CALL	WriteString
  0000006A  B9 0000000A	     1		MOV		ECX, NUMCOUNT
  0000006F		     1	_WriteValue:
@@ -437,7 +485,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
  00000076  2B C3	     1		SUB		EAX, EBX
  00000078  BB 00000004	     1		MOV		EBX, 4
  0000007D  F7 E3	     1		MUL		EBX
- 0000007F  BE 00000231 R     1		MOV		ESI, OFFSET validatedNums
+ 0000007F  BE 00000233 R     1		MOV		ESI, OFFSET validatedNums
  00000084  03 F0	     1		ADD		ESI, EAX
  00000086  83 F9 0A	     1		CMP		ECX, NUMCOUNT
  00000089  74 0E	     1		JZ		_ShowNumber
@@ -447,8 +495,8 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
  00000094  E8 00000000 E     1		CALL	WriteChar
  00000099		     1	_ShowNumber:
  00000099  FF 36	     1		PUSH	[ESI]
- 0000009B  68 0000021E R     1		PUSH	OFFSET buffer
- 000000A0  68 00000229 R     1		PUSH	OFFSET bufferSize
+ 0000009B  68 00000220 R     1		PUSH	OFFSET buffer
+ 000000A0  68 0000022B R     1		PUSH	OFFSET bufferSize
  000000A5  E8 00000140	     1		CALL	WriteVal
  000000AA  E2 C3	     1		LOOP _WriteValue
  000000AC  61		     1		POPAD
@@ -823,33 +871,33 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
  00000224  83 F8 00			CMP		EAX, 0
  00000227  75 E3			JNZ		_ConvertNumber
 
-					; Check if number is negative, and if so, display sign
- 00000229  80 7D FB 01			CMP		numIsNegative, 1
- 0000022D  75 07			JNZ		_BeginNumberDisplay
- 0000022F  B0 2D			MOV		AL, '-'
- 00000231  E8 00000000 E		CALL	WriteChar
+					; Since STOSB increments to next address, get back to last digit
+ 00000229  4F				DEC		EDI
 
- 00000236			_BeginNumberDisplay:
+					; Display number to console
+					mDisplayString EDI, numLength, numIsNegative
+ 0000022A  60		     1		PUSHAD
+ 0000022B  80 7D FB 01	     1		CMP		numIsNegative, 1
+ 0000022F  75 07	     1		JNZ		_BeginNumberDisplay
+ 00000231  B0 2D	     1		MOV		AL, '-'
+ 00000233  E8 00000000 E     1		CALL	WriteChar
+ 00000238		     1	_BeginNumberDisplay:
+ 00000238  8B F7	     1		MOV		ESI, EDI
+ 0000023A  FD		     1		STD
+ 0000023B  0F B6 4D FA	     1		MOVZX	ECX, numLength
+ 0000023F		     1	_DisplayNumber:
+ 0000023F  AC		     1		LODSB
+ 00000240  E8 00000000 E     1		CALL	WriteChar
+ 00000245  E2 F8	     1		LOOP _DisplayNumber
+ 00000247  61		     1		POPAD
 
-					; Number has been stored in buffer in reverse, so we walk backwards through string of digits
- 00000236  8B F7			MOV		ESI, EDI
- 00000238  4E				DEC		ESI						; Since STOSB increments to next address, get back to end of number
- 00000239  FD				STD
- 0000023A  0F B6 4D FA			MOVZX	ECX, numLength
-
- 0000023E			_DisplayNumber:
- 0000023E  AC				LODSB
- 0000023F  E8 00000000 E		CALL	WriteChar
-
- 00000244  E2 F8			LOOP _DisplayNumber
-					
- 00000246  61				POPAD
- 00000247  C9		   *	    leave  
- 00000248  C2 000C			RET		12
- 0000024B			WriteVal ENDP
+ 00000248  61				POPAD
+ 00000249  C9		   *	    leave  
+ 0000024A  C2 000C			RET		12
+ 0000024D			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:02:26
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/28/20 09:39:21
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -859,6 +907,7 @@ Macros:
 
                 N a m e                 Type
 
+mDisplayString . . . . . . . . .	Proc
 mGetString . . . . . . . . . . .	Proc
 mGetValues . . . . . . . . . . .	Proc
 mShowErrorMessage  . . . . . . .	Proc
@@ -955,8 +1004,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000259 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000024B Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000025B Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000024D Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -1084,13 +1133,13 @@ WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteVal . . . . . . . . . . . .	P Near	 000001EA _TEXT	Length= 00000061 Public STDCALL
+WriteVal . . . . . . . . . . . .	P Near	 000001EA _TEXT	Length= 00000063 Public STDCALL
   numToWrite . . . . . . . . . .	DWord	 bp - 00000004
   numIsNegative  . . . . . . . .	Byte	 bp - 00000005
   numLength  . . . . . . . . . .	Byte	 bp - 00000006
   _ConvertNumber . . . . . . . .	L Near	 0000020C _TEXT	
-  _BeginNumberDisplay  . . . . .	L Near	 00000236 _TEXT	
-  _DisplayNumber . . . . . . . .	L Near	 0000023E _TEXT	
+  _BeginNumberDisplay  . . . . .	L Near	 00000238 _TEXT	
+  _DisplayNumber . . . . . . . .	L Near	 0000023F _TEXT	
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000C0 Public STDCALL
   _GetValue  . . . . . . . . . .	L Near	 0000001C _TEXT	
@@ -1321,17 +1370,17 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bufferSize . . . . . . . . . . .	DWord	 00000229 _DATA	
-buffer . . . . . . . . . . . . .	Byte	 0000021E _DATA	
+bufferSize . . . . . . . . . . .	DWord	 0000022B _DATA	
+buffer . . . . . . . . . . . . .	Byte	 00000220 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-errorMessage . . . . . . . . . .	Byte	 0000018F _DATA	
+errorMessage . . . . . . . . . .	Byte	 00000191 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 goodbyeMessage . . . . . . . . .	Byte	 00000040 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-instructions . . . . . . . . . .	Byte	 0000007D _DATA	
+instructions . . . . . . . . . .	Byte	 0000007F _DATA	
 introMessage . . . . . . . . . .	Byte	 00000000 _DATA	
-isNumberValid  . . . . . . . . .	DWord	 0000022D _DATA	
+isNumberValid  . . . . . . . . .	DWord	 0000022F _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -1339,10 +1388,10 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numberPrompt . . . . . . . . . .	Byte	 00000170 _DATA	
+numberPrompt . . . . . . . . . .	Byte	 00000172 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-resultPrompt1  . . . . . . . . .	Byte	 000001FF _DATA	
-validatedNums  . . . . . . . . .	DWord	 00000231 _DATA	
+resultPrompt1  . . . . . . . . .	Byte	 00000201 _DATA	
+validatedNums  . . . . . . . . .	DWord	 00000233 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
