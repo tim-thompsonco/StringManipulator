@@ -122,67 +122,6 @@ mShowMessage	MACRO message:REQ
 ENDM
 
 ; ---------------------------------------------------------------------
-; Name: mGetValues
-;
-; Get 10 signed integer numbers from user which fit inside a SDWORD and
-; populate an array with the validated numbers.
-;
-; Preconditions:	Prompt is initialized and is a BYTE array containing
-;					the user prompt to display. userInput is initialized
-;					and is a BYTE array. userInputLength is initialized
-;					and is a DWORD.
-;
-; Postconditions: None.
-;
-; Receives:
-;		numsToGet = constant value of numbers to read in.
-;		numArr = address of array to store validated numbers.
-;		minVal = constant value of min valid value for number.
-;		maxVal = constant value max valid value for number.
-;		errorMsg = address of error message for invalid entry.
-;		isNumValid = address of boolean isNumberValid.
-;		numPrompt = address of user prompt.
-;		inputBuffer = address of buffer to store user input.
-;		inputBufferSize = address to store length of user input.
-;		maxBuffer = constant value of max buffer size.
-;
-; Returns:
-;		inputBuffer is populated with string of number input by user.
-;		inputBufferSize is populated with length of user inputted number.
-;		numArr contains validated numbers input by user.
-; ---------------------------------------------------------------------
-mGetValues	MACRO numsToGet:REQ, numArr:REQ, minVal:REQ, maxVal:REQ, errorMsg:REQ, isNumValid:REQ, numPrompt:REQ, inputBuffer:REQ, inputBufferSize:REQ, maxBuffer:REQ
-	PUSHAD
-
-	MOV		ECX, numsToGet
-_GetValue:
-	; Get first address of numArr that is empty to store number in
-	MOV		EAX, numsToGet
-	MOV		EBX, ECX
-	SUB		EAX, EBX
-	MOV		EBX, 4
-	MUL		EBX
-	MOV		ESI, OFFSET numArr
-	ADD		ESI, EAX
-
-	; Request signed integer number from user
-	PUSH	maxBuffer
-	PUSH	ESI
-	PUSH	minVal
-	PUSH	maxVal
-	PUSH	OFFSET errorMsg
-	PUSH	OFFSET isNumValid
-	PUSH	OFFSET numPrompt
-	PUSH	OFFSET inputBuffer
-	PUSH	OFFSET inputBufferSize
-	CALL	ReadVal
-
-	LOOP _GetValue
-
-	POPAD
-ENDM
-
-; ---------------------------------------------------------------------
 ; Name: mWriteValues
 ;
 ; Write 10 signed integer numbers from an array of numbers by converting
@@ -275,7 +214,30 @@ main PROC
 	mShowMessage OFFSET introMessage
 
 	; Obtain values from user
-	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize, MAXBUFFERSIZE
+	MOV		ECX, NUMCOUNT
+_GetValue:
+	; Get first address of validatedNums that is empty to store number in
+	MOV		EAX, NUMCOUNT
+	MOV		EBX, ECX
+	SUB		EAX, EBX
+	MOV		EBX, 4
+	MUL		EBX
+	MOV		ESI, OFFSET validatedNums
+	ADD		ESI, EAX
+
+	; Request signed integer number from user
+	PUSH	MAXBUFFERSIZE
+	PUSH	ESI
+	PUSH	MINVALIDVAL
+	PUSH	MAXVALIDVAL
+	PUSH	OFFSET errorMessage
+	PUSH	OFFSET isNumberValid
+	PUSH	OFFSET numberPrompt
+	PUSH	OFFSET buffer
+	PUSH	OFFSET bufferSize
+	CALL	ReadVal
+
+	LOOP _GetValue
 
 	; Write values to console
 	mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
