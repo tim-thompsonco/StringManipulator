@@ -102,6 +102,7 @@ ENDM
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
 	validatedNums	SDWORD	NUMCOUNT DUP(?)
+	sumTotal		SDWORD	0
 
 .code
 main PROC
@@ -168,6 +169,11 @@ _ShowNumber:
 	CALL	WriteVal
 
 	LOOP	_WriteValue
+
+	PUSH	OFFSET sumTotal
+	PUSH	OFFSET validatedNums
+	PUSH	NUMCOUNT
+	CALL	CalculateSum
 
 	; Say goodbye to the user
 	PUSH	OFFSET goodbyeMessage
@@ -615,5 +621,53 @@ _ReverseDigits:
 	POP		EBP
 	RET		8
 ReverseString ENDP
+
+; ---------------------------------------------------------------------
+; Name: CalculateSum
+;
+; Calculates the sum of the validated numbers entered by the user.
+;
+; Preconditions:	validatedNums is a SDWORD array initialized and
+;					populated with validated numbers for the entirety
+;					of its length. The length of the array is equal
+;					to the constant value NUMCOUNT. sumTotal is a
+;					SDWORD and is initialized.
+;
+; Postconditions: None.
+;
+; Receives:
+;		[EBP+8] = value of length of validatedNums array.
+;		[EBP+12] = address of array of validatedNums array.
+;		[EBP+16] = address of sumTotal to store results in.
+
+; Returns:
+;		Sum total of the numbers entered by the user in sumTotal.
+; ---------------------------------------------------------------------
+CalculateSum PROC
+	PUSH	EBP
+	MOV		EBP, ESP
+	PUSHAD
+
+	; Running sum will be stored in EAX, address of array in ESI
+	MOV		EAX, 0
+	MOV		ESI, [EBP+12]
+
+	; Length of validatedNums array will be used as loop counter
+	MOV		ECX, [EBP+8]
+_AddNumberToSum:
+	; Add current number to running total then go to next number
+	ADD		EAX, [ESI]
+	ADD		ESI, 4
+
+	LOOP	_AddNumberToSum
+
+	; Store and return results
+	MOV		EDI, [EBP+16]
+	MOV		[EDI], EAX
+
+	POPAD
+	POP		EBP
+	RET		12
+CalculateSum ENDP
 
 END main
