@@ -105,24 +105,17 @@ _DisplayNumber:
 ENDM
 
 ; ---------------------------------------------------------------------
-; Name: mShowIntroduction
+; Name: mShowMessage
 ;
-; Displays an introduction message with author name to the user and
-; then displays instructions for the user.
+; Displays a message to the console.
 ;
 ; Receives:
-;		introMessage = reference to address of introduction message.
-;		instructions = reference to address of program instructions.
+;		message = address of message.
 ; ---------------------------------------------------------------------
-mShowIntroduction	MACRO introMessage:REQ, instructions:REQ
+mShowMessage	MACRO message:REQ
 	PUSH	EDX
 
-	; Display introduction to user
-	MOV		EDX, OFFSET introMessage
-	CALL	WriteString
-
-	; Display program instructions to user
-	MOV		EDX, OFFSET instructions
+	MOV		EDX, OFFSET message
 	CALL	WriteString
 
 	POP		EDX
@@ -297,11 +290,11 @@ ENDM
 
 .data
 
-	introMessage	BYTE	"Designing Low-Level I/O Procedures & Macros by Tim Thompson",13,10,13,10,0
-	goodbyeMessage	BYTE	13,10,13,10,"So long and thanks for all the knowledge! Wonderful class.",0
-	instructions	BYTE	"Please provide 10 signed decimal integers.",13,10
+	introMessage	BYTE	"Designing Low-Level I/O Procedures & Macros by Tim Thompson",13,10,13,10
+					BYTE	"Please provide 10 signed decimal integers.",13,10
 					BYTE	"Each number needs to be capable of fitting inside a 32 bit register. After you have finished entering",13,10
 					BYTE	"the raw numbers, I will display a list of the integers, their sum, and their average value.",13,10,13,10,0
+	goodbyeMessage	BYTE	13,10,13,10,"So long and thanks for all the knowledge! Wonderful class.",0
 	numberPrompt	BYTE	"Please enter a signed number: ",0
 	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
@@ -314,13 +307,13 @@ ENDM
 main PROC
 
 	; Introduce program to user and display instructions
-	mShowIntroduction introMessage, instructions
+	mShowMessage introMessage
 
 	; Obtain values from user
 	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize, MAXBUFFERSIZE
 
 	; Write values to console
-	;mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
+	mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
 
 	; Say goodbye to the user
 	mShowGoodbye goodbyeMessage
