@@ -29,15 +29,16 @@ INCLUDE Irvine32.inc
 ; Postconditions: None.
 ;
 ; Receives:
-;		prompt = address of user prompt to display
-;		userInput = address of buffer array to store user input
-;		userInputLength = address of buffer size to store input length
+;		prompt = address of user prompt to display.
+;		userInput = address of buffer array to store user input.
+;		userInputLength = address of buffer size to store input length.
+;		maxBuffer = constant value of max buffer size.
 ;
 ; Returns:
 ;		userInput contains string of number entered by user.
 ;		userInputLength contains length of string entered by user.
 ; ---------------------------------------------------------------------
-mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
+mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ, maxBuffer:REQ
 	PUSHAD
 
 	; Prompt user for signed integer number
@@ -46,7 +47,7 @@ mGetString	MACRO prompt:REQ, userInput:REQ, userInputLength:REQ
 
 	; Store user input
 	MOV		EDX, userInput
-	MOV		ECX, 15
+	MOV		ECX, maxBuffer
 	CALL	ReadString
 
 	; Store size of user input
@@ -176,22 +177,23 @@ ENDM
 ; Postconditions: None.
 ;
 ; Receives:
-;		numsToGet = reference to constant value of numbers to read in.
-;		numArr = reference to address of array to store validated numbers.
-;		minVal = reference to constant value of min valid value for number.
-;		maxVal = reference to constant value max valid value for number.
-;		errorMsg = reference to address of error message for invalid entry.
-;		isNumValid = reference to address of boolean isNumberValid.
-;		numPrompt = reference to address of user prompt.
-;		inputBuffer = reference to address of buffer to store user input.
-;		inputBufferSize = reference to address to store length of user input.
+;		numsToGet = constant value of numbers to read in.
+;		numArr = address of array to store validated numbers.
+;		minVal = constant value of min valid value for number.
+;		maxVal = constant value max valid value for number.
+;		errorMsg = address of error message for invalid entry.
+;		isNumValid = address of boolean isNumberValid.
+;		numPrompt = address of user prompt.
+;		inputBuffer = address of buffer to store user input.
+;		inputBufferSize = address to store length of user input.
+;		maxBuffer = constant value of max buffer size.
 ;
 ; Returns:
-;		buffer is populated with string of number input by user.
-;		buffer size is populated with length of user inputted number.
+;		inputBuffer is populated with string of number input by user.
+;		inputBufferSize is populated with length of user inputted number.
 ;		numArr contains validated numbers input by user.
 ; ---------------------------------------------------------------------
-mGetValues	MACRO numsToGet:REQ, numArr:REQ, minVal:REQ, maxVal:REQ, errorMsg:REQ, isNumValid:REQ, numPrompt:REQ, inputBuffer:REQ, inputBufferSize:REQ
+mGetValues	MACRO numsToGet:REQ, numArr:REQ, minVal:REQ, maxVal:REQ, errorMsg:REQ, isNumValid:REQ, numPrompt:REQ, inputBuffer:REQ, inputBufferSize:REQ, maxBuffer:REQ
 	PUSHAD
 
 	MOV		ECX, numsToGet
@@ -206,6 +208,7 @@ _GetValue:
 	ADD		ESI, EAX
 
 	; Request signed integer number from user
+	PUSH	maxBuffer
 	PUSH	ESI
 	PUSH	minVal
 	PUSH	maxVal
@@ -314,10 +317,10 @@ main PROC
 	mShowIntroduction introMessage, instructions
 
 	; Obtain values from user
-	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize
+	mGetValues NUMCOUNT, validatedNums, MINVALIDVAL, MAXVALIDVAL, errorMessage, isNumberValid, numberPrompt, buffer, bufferSize, MAXBUFFERSIZE
 
 	; Write values to console
-	mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
+	;mWriteValues validatedNums, NUMCOUNT, buffer, bufferSize, resultPrompt1
 
 	; Say goodbye to the user
 	mShowGoodbye goodbyeMessage
@@ -356,6 +359,7 @@ main ENDP
 ;		[EBP+28] = reference to max valid value for number.
 ;		[EBP+32] = reference to min valid value for number.
 ;		[EBP+36] = reference to array to store validated numbers.
+;		[EBP+40] = constant value of max buffer size.
 ;
 ; Returns:
 ;		buffer is populated with string of number input by user.
@@ -372,7 +376,7 @@ ReadVal PROC
 
 _GetNumber:
 	; Call macro to get and store number input by user
-	mGetString	[EBP+16], [EBP+12], EDI
+	mGetString	[EBP+16], [EBP+12], EDI, [EBP+40]
 
 	; Validate user input to ensure it is not empty and is a number
 	PUSH		[EBP+20]
@@ -411,7 +415,7 @@ _CheckNumberSize:
 _DoneReadingValue:
 	POPAD
 	POP		EBP
-	RET		32
+	RET		36
 ReadVal ENDP
 
 ; ---------------------------------------------------------------------
