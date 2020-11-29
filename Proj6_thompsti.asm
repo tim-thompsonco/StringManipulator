@@ -744,7 +744,7 @@ CalculateAverage PROC
 	MOV		EAX, [EBP+12]
 	MOV		EBX, [EBP+8]
 	CDQ
-	DIV		EBX
+	IDIV	EBX
 
 	; Store and return results
 	MOV		EDI, [EBP+16]

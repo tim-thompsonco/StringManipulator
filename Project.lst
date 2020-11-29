@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 09:47:51
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 10:26:42
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -911,7 +911,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 09:47:51
  00000311  8B 45 0C			MOV		EAX, [EBP+12]
  00000314  8B 5D 08			MOV		EBX, [EBP+8]
  00000317  99				CDQ
- 00000318  F7 F3			DIV		EBX
+ 00000318  F7 FB			IDIV	EBX
 
 					; Store and return results
  0000031A  8B 7D 10			MOV		EDI, [EBP+16]
@@ -923,7 +923,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 09:47:51
  00000324			CalculateAverage ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 09:47:51
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 10:26:42
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
