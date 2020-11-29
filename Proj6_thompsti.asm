@@ -104,6 +104,7 @@ ENDM
 	isNumberValid	DWORD	0
 	validatedNums	SDWORD	NUMCOUNT DUP(?)
 	sumTotal		SDWORD	0
+	numAvg			SDWORD	0
 
 .code
 main PROC
@@ -184,6 +185,12 @@ _ShowNumber:
 	PUSH	OFFSET buffer
 	PUSH	OFFSET bufferSize
 	CALL	WriteVal
+
+	; Calculate rounded average of validated numbers
+	PUSH	OFFSET numAvg
+	PUSH	sumTotal
+	PUSH	NUMCOUNT
+	CALL	CalculateAverage
 
 	; Say goodbye to the user
 	PUSH	OFFSET goodbyeMessage
@@ -679,5 +686,46 @@ _AddNumberToSum:
 	POP		EBP
 	RET		12
 CalculateSum ENDP
+
+; ---------------------------------------------------------------------
+; Name: CalculateAverage
+;
+; Calculates the rounded average of the validated numbers entered by the
+; user.
+;
+; Preconditions:	sumTotal is a SDWORD and is populated with the sum
+;					total of the validated numbers. The number count is
+;					equal to the constant value NUMCOUNT. numAvg is a
+;					SDWORD and is initialized.
+;
+; Postconditions: None.
+;
+; Receives:
+;		[EBP+8] = value of number count.
+;		[EBP+12] = value of total sum of numbers.
+;		[EBP+16] = address of numAvg to store results in.
+
+; Returns:
+;		Rounded average of the numbers entered by the user in numAvg.
+; ---------------------------------------------------------------------
+CalculateAverage PROC
+	PUSH	EBP
+	MOV		EBP, ESP
+	PUSHAD
+
+	; Obtain rounded average by dividing sum total by count of numbers
+	MOV		EAX, [EBP+12]
+	MOV		EBX, [EBP+8]
+	CDQ
+	DIV		EBX
+
+	; Store and return results
+	MOV		EDI, [EBP+16]
+	MOV		[EDI], EAX
+
+	POPAD
+	POP		EBP
+	RET		12
+CalculateAverage ENDP
 
 END main
