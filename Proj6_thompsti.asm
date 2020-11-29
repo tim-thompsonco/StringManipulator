@@ -98,6 +98,7 @@ ENDM
 	numberPrompt	BYTE	"Please enter a signed number: ",0
 	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
+	sumTotalMsg		BYTE	13,10,13,10,"The sum of these numbers is: ",0
 	buffer			BYTE	MAXBUFFERSIZE DUP(?)
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
@@ -170,10 +171,19 @@ _ShowNumber:
 
 	LOOP	_WriteValue
 
+	; Calculate sum total of validated numbers
 	PUSH	OFFSET sumTotal
 	PUSH	OFFSET validatedNums
 	PUSH	NUMCOUNT
 	CALL	CalculateSum
+
+	; Display sum total of validated numbers
+	PUSH	OFFSET sumTotalMsg
+	CALL	ShowMessage
+	PUSH	sumTotal
+	PUSH	OFFSET buffer
+	PUSH	OFFSET bufferSize
+	CALL	WriteVal
 
 	; Say goodbye to the user
 	PUSH	OFFSET goodbyeMessage
