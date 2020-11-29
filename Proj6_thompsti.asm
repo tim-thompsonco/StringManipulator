@@ -168,6 +168,7 @@ _ShowNumber:
 	; Write value to console
 	PUSH	[ESI]
 	PUSH	OFFSET buffer
+	PUSH	OFFSET bufferSize
 	CALL	WriteVal
 
 	LOOP	_WriteValue
@@ -519,26 +520,27 @@ ValidateNumber ENDP
 ; Convert a numeric value into a string of ASCII digits and then display
 ; the value to the console.
 ;
-; Preconditions:	Buffer is a BYTE array and number is a SDWORD. Both
-;					identifiers are initialized and number is validated.
+; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
+;					Number is a SDWORD. All three identifiers are
+;					initialized and number is validated.
 ;
 ; Postconditions:	Buffer contains reversed number as string of ASCII
-;					digits.
+;					digits. bufferSize contains length of number.
 ;
 ; Receives:
-;		[EBP+8] = address of buffer for user input.
-;		[EBP+12] = value of number.
+;		[EBP+8] = address of bufferSize for user input.
+;		[EBP+12] = address of buffer for user input.
+;		[EBP+16] = value of number.
 ;
 ; Returns: None.
 ; ---------------------------------------------------------------------
 WriteVal PROC
 	LOCAL	numToWrite:SDWORD
 	LOCAL	numIsNegative:BYTE
-	LOCAL	numLength:DWORD
 	PUSHAD
 
-	MOV		EDI, [EBP+8]			; Buffer to store ASCII digits
-	MOV		EAX, [EBP+12]			; Value of number to be converted
+	MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
+	MOV		EAX, [EBP+16]			; Value of number to be converted
 	CLD
 
 	; Store number in local variable since EAX/EDX will be used for division
@@ -561,7 +563,6 @@ _ConvertNumber:
 	MOV		AL, DL
 	ADD		AL, 48					; Convert back to ASCII character for number
 	STOSB
-	INC		numLength
 	POP		EAX
 	MOV		numToWrite, EAX
 	CMP		EAX, 0
@@ -572,32 +573,25 @@ _ConvertNumber:
 	JNZ		_ConversionDone
 	MOV		AL, '-'
 	STOSB
-	INC		numLength
 
 _ConversionDone:
 	; Add null terminator to end of string to complete it
 	MOV		AL, 0
 	STOSB
 
-	; Check if number is single digit, and if so, it is ready to display
-	MOV		EAX, numLength
-	CMP		EAX, 1
-	JZ		_DisplayNumber
-
-	; If number is two or more digits, the number is populated as
-	; string of ASCII digits in reverse, so we reverse the string
-	; to get the string to be displayed
-	PUSH	EAX
-	PUSH	[EBP+8]
+	; Number is populated as string of ASCII digits in reverse, so we
+	; reverse the string to get the string to be displayed
+	MOV		ESI, [EBP+8]
+	PUSH	[ESI]
+	PUSH	[EBP+12]
 	CALL	ReverseString
 
-_DisplayNumber:
 	; Display number to console
-	MOV		ESI, [EBP+8]
+	MOV		ESI, [EBP+12]
 	mDisplayString ESI
 
 	POPAD
-	RET		8
+	RET		12
 WriteVal ENDP
 
 ; ---------------------------------------------------------------------
@@ -605,16 +599,16 @@ WriteVal ENDP
 ;
 ; Reverses a string of ASCII digits that represents a number.
 ;
-; Preconditions:	Buffer is a BYTE array and number length is a DWORD.
+; Preconditions:	Buffer is a BYTE array and buffer size is a DWORD.
 ;					Buffer contains a string of ASCII digits which
-;					represents a number and any sign. Length of number
-;					includes sign if number is negative.
+;					represents a number. Buffer size contains the
+;					length of the string, which includes any sign.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
 ;		[EBP+8] = address of buffer for user input.
-;		[EBP+12] = value of length of number.
+;		[EBP+12] = value of buffer size for user input.
 ;
 ; Returns:
 ;		Reversed string of ASCII digits representing a number.
