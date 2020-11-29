@@ -99,6 +99,7 @@ ENDM
 	errorMessage	BYTE	"ERROR: Your number was too big, you did not enter a signed number, or your entry was blank. Please try again.",13,10,0
 	resultPrompt1	BYTE	13,10,"You entered these numbers:",13,10,0
 	sumTotalMsg		BYTE	13,10,13,10,"The sum of these numbers is: ",0
+	roundedAvgMsg	BYTE	13,10,13,10,"The rounded average of these numbers is: ",0
 	buffer			BYTE	MAXBUFFERSIZE DUP(?)
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
@@ -178,9 +179,11 @@ _ShowNumber:
 	PUSH	NUMCOUNT
 	CALL	CalculateSum
 
-	; Display sum total of validated numbers
+	; Display sum total message
 	PUSH	OFFSET sumTotalMsg
 	CALL	ShowMessage
+
+	; Display sum total of validated numbers
 	PUSH	sumTotal
 	PUSH	OFFSET buffer
 	PUSH	OFFSET bufferSize
@@ -191,6 +194,16 @@ _ShowNumber:
 	PUSH	sumTotal
 	PUSH	NUMCOUNT
 	CALL	CalculateAverage
+
+	; Display rounded average message
+	PUSH	OFFSET roundedAvgMsg
+	CALL	ShowMessage
+
+	; Display rounded average of validated numbers
+	PUSH	numAvg
+	PUSH	OFFSET buffer
+	PUSH	OFFSET bufferSize
+	CALL	WriteVal
 
 	; Say goodbye to the user
 	PUSH	OFFSET goodbyeMessage
