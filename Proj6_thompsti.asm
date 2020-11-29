@@ -536,7 +536,10 @@ ValidateNumber ENDP
 ; ---------------------------------------------------------------------
 WriteVal PROC
 	LOCAL	numToWrite:SDWORD
+	LOCAL	stringLength:BYTE
 	LOCAL	numIsNegative:BYTE
+	MOV		stringLength, 0
+	MOV		numIsNegative, 0
 	PUSHAD
 
 	MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
@@ -563,6 +566,7 @@ _ConvertNumber:
 	MOV		AL, DL
 	ADD		AL, 48					; Convert back to ASCII character for number
 	STOSB
+	INC		BYTE PTR stringLength
 	POP		EAX
 	MOV		numToWrite, EAX
 	CMP		EAX, 0
@@ -573,19 +577,29 @@ _ConvertNumber:
 	JNZ		_ConversionDone
 	MOV		AL, '-'
 	STOSB
+	INC		BYTE PTR stringLength
 
 _ConversionDone:
 	; Add null terminator to end of string to complete it
 	MOV		AL, 0
 	STOSB
 
+	; Update buffer size to length of string
+	MOVZX	EAX, stringLength
+	MOV		ESI, [EBP+8]
+	MOV		[ESI], EAX
+
+	; Check if number is single digit, and if so, it is ready to display
+	CMP		EAX, 1
+	JZ		_DisplayNumber
+
 	; Number is populated as string of ASCII digits in reverse, so we
 	; reverse the string to get the string to be displayed
-	MOV		ESI, [EBP+8]
 	PUSH	[ESI]
 	PUSH	[EBP+12]
 	CALL	ReverseString
 
+_DisplayNumber:
 	; Display number to console
 	MOV		ESI, [EBP+12]
 	mDisplayString ESI
