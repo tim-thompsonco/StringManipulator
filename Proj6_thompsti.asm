@@ -1,7 +1,7 @@
 TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 
 ; Author: Tim Thompson
-; Last Modified: 11/28/20
+; Last Modified: 11/30/20
 ; OSU email address: thompsti@oregonstate.edu
 ; Course number/section:   CS271 Section 400
 ; Project Number:       6         Due Date: 12/6/20
@@ -40,7 +40,10 @@ INCLUDE Irvine32.inc
 ;		inputBufferLength contains length of string entered by user.
 ; ---------------------------------------------------------------------
 mGetString	MACRO prompt:REQ, inputBuffer:REQ, inputBufferLength:REQ, maxBufferSize:REQ
-	PUSHAD
+	PUSH	EDX
+	PUSH	ECX
+	PUSH	EDI
+	PUSH	EAX
 
 	; Prompt user for signed integer number
 	MOV		EDX, prompt
@@ -55,7 +58,10 @@ mGetString	MACRO prompt:REQ, inputBuffer:REQ, inputBufferLength:REQ, maxBufferSi
 	MOV		EDI, inputBufferLength
 	MOV		[EDI], EAX
 
-	POPAD
+	POP		EAX
+	POP		EDI
+	POP		ECX
+	POP		EDX
 ENDM
 
 ; ---------------------------------------------------------------------
