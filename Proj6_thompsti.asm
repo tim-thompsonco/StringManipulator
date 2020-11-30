@@ -107,7 +107,7 @@ ENDM
 	sumTotalMsg		BYTE	13,10,13,10,"The sum of these numbers is: ",0
 	roundedAvgMsg	BYTE	13,10,13,10,"The rounded average of these numbers is: ",0
 	buffer			BYTE	MAXBUFFERSIZE DUP(?)
-	firstNumToShow	DWORD	0
+	firstNumToShow	WORD	0
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
 	validatedNums	SDWORD	NUMCOUNT DUP(?)
@@ -164,7 +164,7 @@ _WriteValue:
 	; Set boolean firstNumToShow to 1 if first number to display, 0 if not
 	CMP		ECX, NUMCOUNT
 	JNZ		_ShowNumber
-	MOV		DWORD PTR firstNumToShow, 1
+	MOV		WORD PTR firstNumToShow, 1
 
 _ShowNumber:
 	; Write value to console
@@ -175,7 +175,7 @@ _ShowNumber:
 	CALL	WriteVal
 
 	; Reset boolean firstNumToShow for later use
-	MOV		DWORD PTR firstNumToShow, 0
+	MOV		WORD PTR firstNumToShow, 0
 
 	LOOP	_WriteValue
 
@@ -189,7 +189,7 @@ _ShowNumber:
 	mDisplayString OFFSET sumTotalMsg
 
 	; The sum and average will both be the first number to display
-	MOV		DWORD PTR firstNumToShow, 1
+	MOV		WORD PTR firstNumToShow, 1
 
 	; Display sum total of validated numbers
 	PUSH	firstNumToShow
@@ -507,7 +507,7 @@ ValidateNumber ENDP
 ; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
 ;					Number is a SDWORD. All three identifiers are
 ;					initialized and number is validated. firstNumToShow
-;					is a DWORD containing a 1 if this is the first number
+;					is a WORD containing a 1 if this is the first number
 ;					to display to console, 0 if it is not the first.
 ;
 ; Postconditions:	Buffer contains reversed number as string of ASCII
@@ -568,8 +568,8 @@ _ConvertNumber:
 
 _ConversionDone:
 	; Add formatting to end of string for display to console if not the first number
-	MOV		EAX, [EBP+20]
-	CMP		EAX, 1
+	MOV		AX, [EBP+20]
+	CMP		AX, 1
 	JZ		_StringReadyToComplete
 	MOV		AL, ' '
 	STOSB
@@ -603,7 +603,7 @@ _DisplayNumber:
 	mDisplayString ESI
 
 	POPAD
-	RET		16
+	RET		14
 WriteVal ENDP
 
 ; ---------------------------------------------------------------------

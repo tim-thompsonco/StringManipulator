@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 08:01:37
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -250,14 +250,14 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
  00000271  0000000E [			buffer			BYTE	MAXBUFFERSIZE DUP(?)
 	    00
 	   ]
- 0000027F 00000000			firstNumToShow	DWORD	0
- 00000283 00000000			bufferSize		DWORD	0
- 00000287 00000000			isNumberValid	DWORD	0
- 0000028B  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
+ 0000027F 0000				firstNumToShow	WORD	0
+ 00000281 00000000			bufferSize		DWORD	0
+ 00000285 00000000			isNumberValid	DWORD	0
+ 00000289  0000000A [			validatedNums	SDWORD	NUMCOUNT DUP(?)
 	    00000000
 	   ]
- 000002B3 00000000			sumTotal		SDWORD	0
- 000002B7 00000000			numAvg			SDWORD	0
+ 000002B1 00000000			sumTotal		SDWORD	0
+ 000002B5 00000000			numAvg			SDWORD	0
 
  00000000			.code
  00000000			main PROC
@@ -278,7 +278,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
  00000018  2B C3			SUB		EAX, EBX
  0000001A  BB 00000004			MOV		EBX, 4
  0000001F  F7 E3			MUL		EBX
- 00000021  BE 0000028B R		MOV		ESI, OFFSET validatedNums
+ 00000021  BE 00000289 R		MOV		ESI, OFFSET validatedNums
  00000026  03 F0			ADD		ESI, EAX
 
 					; Request signed integer number from user
@@ -287,10 +287,10 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
  0000002B  68 80000000			PUSH	MINVALIDVAL
  00000030  68 7FFFFFFF			PUSH	MAXVALIDVAL
  00000035  68 00000192 R		PUSH	OFFSET errorMessage
- 0000003A  68 00000287 R		PUSH	OFFSET isNumberValid
+ 0000003A  68 00000285 R		PUSH	OFFSET isNumberValid
  0000003F  68 00000173 R		PUSH	OFFSET numberPrompt
  00000044  68 00000271 R		PUSH	OFFSET buffer
- 00000049  68 00000283 R		PUSH	OFFSET bufferSize
+ 00000049  68 00000281 R		PUSH	OFFSET bufferSize
  0000004E  E8 000000EA			CALL	ReadVal
 
  00000053  E2 BC			LOOP	_GetValue
@@ -311,71 +311,77 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
  0000006D  2B C3			SUB		EAX, EBX
  0000006F  BB 00000004			MOV		EBX, 4
  00000074  F7 E3			MUL		EBX
- 00000076  BE 0000028B R		MOV		ESI, OFFSET validatedNums
+ 00000076  BE 00000289 R		MOV		ESI, OFFSET validatedNums
  0000007B  03 F0			ADD		ESI, EAX
 
 					; Set boolean firstNumToShow to 1 if first number to display, 0 if not
  0000007D  83 F9 0A			CMP		ECX, NUMCOUNT
- 00000080  75 0A			JNZ		_ShowNumber
- 00000082  C7 05 0000027F R		MOV		DWORD PTR firstNumToShow, 1
-	   00000001
+ 00000080  75 09			JNZ		_ShowNumber
+ 00000082  66| C7 05			MOV		WORD PTR firstNumToShow, 1
+	   0000027F R
+	   0001
 
- 0000008C			_ShowNumber:
+ 0000008B			_ShowNumber:
 					; Write value to console
- 0000008C  FF 35 0000027F R		PUSH	firstNumToShow
+ 0000008B  66| FF 35			PUSH	firstNumToShow
+	   0000027F R
  00000092  FF 36			PUSH	[ESI]
  00000094  68 00000271 R		PUSH	OFFSET buffer
- 00000099  68 00000283 R		PUSH	OFFSET bufferSize
+ 00000099  68 00000281 R		PUSH	OFFSET bufferSize
  0000009E  E8 000001CA			CALL	WriteVal
 
 					; Reset boolean firstNumToShow for later use
- 000000A3  C7 05 0000027F R		MOV		DWORD PTR firstNumToShow, 0
-	   00000000
+ 000000A3  66| C7 05			MOV		WORD PTR firstNumToShow, 0
+	   0000027F R
+	   0000
 
- 000000AD  E2 B7			LOOP	_WriteValue
+ 000000AC  E2 B8			LOOP	_WriteValue
 
 					; Calculate sum total of validated numbers
- 000000AF  68 000002B3 R		PUSH	OFFSET sumTotal
- 000000B4  68 0000028B R		PUSH	OFFSET validatedNums
- 000000B9  6A 0A			PUSH	NUMCOUNT
- 000000BB  E8 00000266			CALL	CalculateSum
+ 000000AE  68 000002B1 R		PUSH	OFFSET sumTotal
+ 000000B3  68 00000289 R		PUSH	OFFSET validatedNums
+ 000000B8  6A 0A			PUSH	NUMCOUNT
+ 000000BA  E8 00000269			CALL	CalculateSum
 
 					; Display sum total message
 					mDisplayString OFFSET sumTotalMsg
- 000000C0  52		     1		PUSH	EDX
- 000000C1  BA 00000221 R     1		MOV		EDX, OFFSET sumTotalMsg
- 000000C6  E8 00000000 E     1		CALL	WriteString
- 000000CB  5A		     1		POP		EDX
+ 000000BF  52		     1		PUSH	EDX
+ 000000C0  BA 00000221 R     1		MOV		EDX, OFFSET sumTotalMsg
+ 000000C5  E8 00000000 E     1		CALL	WriteString
+ 000000CA  5A		     1		POP		EDX
 
 					; The sum and average will both be the first number to display
- 000000CC  C7 05 0000027F R		MOV		DWORD PTR firstNumToShow, 1
-	   00000001
+ 000000CB  66| C7 05			MOV		WORD PTR firstNumToShow, 1
+	   0000027F R
+	   0001
 
 					; Display sum total of validated numbers
- 000000D6  FF 35 0000027F R		PUSH	firstNumToShow
- 000000DC  FF 35 000002B3 R		PUSH	sumTotal
- 000000E2  68 00000271 R		PUSH	OFFSET buffer
- 000000E7  68 00000283 R		PUSH	OFFSET bufferSize
- 000000EC  E8 0000017C			CALL	WriteVal
+ 000000D4  66| FF 35			PUSH	firstNumToShow
+	   0000027F R
+ 000000DB  FF 35 000002B1 R		PUSH	sumTotal
+ 000000E1  68 00000271 R		PUSH	OFFSET buffer
+ 000000E6  68 00000281 R		PUSH	OFFSET bufferSize
+ 000000EB  E8 0000017D			CALL	WriteVal
 
 					; Calculate rounded average of validated numbers
- 000000F1  68 000002B7 R		PUSH	OFFSET numAvg
- 000000F6  FF 35 000002B3 R		PUSH	sumTotal
- 000000FC  6A 0A			PUSH	NUMCOUNT
- 000000FE  E8 00000243			CALL	CalculateAverage
+ 000000F0  68 000002B5 R		PUSH	OFFSET numAvg
+ 000000F5  FF 35 000002B1 R		PUSH	sumTotal
+ 000000FB  6A 0A			PUSH	NUMCOUNT
+ 000000FD  E8 00000246			CALL	CalculateAverage
 
 					; Display rounded average message
 					mDisplayString OFFSET roundedAvgMsg
- 00000103  52		     1		PUSH	EDX
- 00000104  BA 00000243 R     1		MOV		EDX, OFFSET roundedAvgMsg
- 00000109  E8 00000000 E     1		CALL	WriteString
- 0000010E  5A		     1		POP		EDX
+ 00000102  52		     1		PUSH	EDX
+ 00000103  BA 00000243 R     1		MOV		EDX, OFFSET roundedAvgMsg
+ 00000108  E8 00000000 E     1		CALL	WriteString
+ 0000010D  5A		     1		POP		EDX
 
 					; Display rounded average of validated numbers
- 0000010F  FF 35 0000027F R		PUSH	firstNumToShow
- 00000115  FF 35 000002B7 R		PUSH	numAvg
+ 0000010E  66| FF 35			PUSH	firstNumToShow
+	   0000027F R
+ 00000115  FF 35 000002B5 R		PUSH	numAvg
  0000011B  68 00000271 R		PUSH	OFFSET buffer
- 00000120  68 00000283 R		PUSH	OFFSET bufferSize
+ 00000120  68 00000281 R		PUSH	OFFSET bufferSize
  00000125  E8 00000143			CALL	WriteVal
 
 					; Say goodbye to the user
@@ -704,7 +710,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
 				; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
 				;					Number is a SDWORD. All three identifiers are
 				;					initialized and number is validated. firstNumToShow
-				;					is a DWORD containing a 1 if this is the first number
+				;					is a WORD containing a 1 if this is the first number
 				;					to display to console, 0 if it is not the first.
 				;
 				; Postconditions:	Buffer contains reversed number as string of ASCII
@@ -768,48 +774,48 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
 
  000002BC			_ConversionDone:
 					; Add formatting to end of string for display to console if not the first number
- 000002BC  8B 45 14			MOV		EAX, [EBP+20]
- 000002BF  83 F8 01			CMP		EAX, 1
- 000002C2  74 0A			JZ		_StringReadyToComplete
- 000002C4  B0 20			MOV		AL, ' '
- 000002C6  AA				STOSB
- 000002C7  B0 2C			MOV		AL, ','
- 000002C9  AA				STOSB
- 000002CA  80 45 FB 02			ADD		BYTE PTR stringLength, 2
+ 000002BC  66| 8B 45 14			MOV		AX, [EBP+20]
+ 000002C0  66| 83 F8 01			CMP		AX, 1
+ 000002C4  74 0A			JZ		_StringReadyToComplete
+ 000002C6  B0 20			MOV		AL, ' '
+ 000002C8  AA				STOSB
+ 000002C9  B0 2C			MOV		AL, ','
+ 000002CB  AA				STOSB
+ 000002CC  80 45 FB 02			ADD		BYTE PTR stringLength, 2
 
- 000002CE			_StringReadyToComplete:
+ 000002D0			_StringReadyToComplete:
 					; Add null terminator to end of string to complete it
- 000002CE  B0 00			MOV		AL, 0
- 000002D0  AA				STOSB
+ 000002D0  B0 00			MOV		AL, 0
+ 000002D2  AA				STOSB
 
 					; Update buffer size to length of string
- 000002D1  0F B6 45 FB			MOVZX	EAX, stringLength
- 000002D5  8B 75 08			MOV		ESI, [EBP+8]
- 000002D8  89 06			MOV		[ESI], EAX
+ 000002D3  0F B6 45 FB			MOVZX	EAX, stringLength
+ 000002D7  8B 75 08			MOV		ESI, [EBP+8]
+ 000002DA  89 06			MOV		[ESI], EAX
 
 					; Check if number is single digit, and if so, it is ready to display
- 000002DA  83 F8 01			CMP		EAX, 1
- 000002DD  74 0A			JZ		_DisplayNumber
+ 000002DC  83 F8 01			CMP		EAX, 1
+ 000002DF  74 0A			JZ		_DisplayNumber
 
 					; Number is populated as string of ASCII digits in reverse, so we
 					; reverse the string to get the string to be displayed
- 000002DF  FF 36			PUSH	[ESI]
- 000002E1  FF 75 0C			PUSH	[EBP+12]
- 000002E4  E8 00000011			CALL	ReverseString
+ 000002E1  FF 36			PUSH	[ESI]
+ 000002E3  FF 75 0C			PUSH	[EBP+12]
+ 000002E6  E8 00000011			CALL	ReverseString
 
- 000002E9			_DisplayNumber:
+ 000002EB			_DisplayNumber:
 					; Display number to console
- 000002E9  8B 75 0C			MOV		ESI, [EBP+12]
+ 000002EB  8B 75 0C			MOV		ESI, [EBP+12]
 					mDisplayString ESI
- 000002EC  52		     1		PUSH	EDX
- 000002ED  8B D6	     1		MOV		EDX, ESI
- 000002EF  E8 00000000 E     1		CALL	WriteString
- 000002F4  5A		     1		POP		EDX
+ 000002EE  52		     1		PUSH	EDX
+ 000002EF  8B D6	     1		MOV		EDX, ESI
+ 000002F1  E8 00000000 E     1		CALL	WriteString
+ 000002F6  5A		     1		POP		EDX
 
- 000002F5  61				POPAD
- 000002F6  C9		   *	    leave  
- 000002F7  C2 0010			RET		16
- 000002FA			WriteVal ENDP
+ 000002F7  61				POPAD
+ 000002F8  C9		   *	    leave  
+ 000002F9  C2 000E			RET		14
+ 000002FC			WriteVal ENDP
 
 				; ---------------------------------------------------------------------
 				; Name: ReverseString
@@ -830,44 +836,44 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
 				; Returns:
 				;		Reversed string of ASCII digits representing a number.
 				; ---------------------------------------------------------------------
- 000002FA			ReverseString PROC
- 000002FA  55				PUSH	EBP
- 000002FB  8B EC			MOV		EBP, ESP
- 000002FD  60				PUSHAD
+ 000002FC			ReverseString PROC
+ 000002FC  55				PUSH	EBP
+ 000002FD  8B EC			MOV		EBP, ESP
+ 000002FF  60				PUSHAD
 
 					; To reverse the string in place, we use the two pointer technique
- 000002FE  8B 7D 08			MOV		EDI, [EBP+8]
- 00000301  8B 75 08			MOV		ESI, [EBP+8]
+ 00000300  8B 7D 08			MOV		EDI, [EBP+8]
+ 00000303  8B 75 08			MOV		ESI, [EBP+8]
 
 					; EDI will track the beginning of the array, ESI tracks the end
- 00000304  03 75 0C			ADD		ESI, [EBP+12]
- 00000307  4E				DEC		ESI
+ 00000306  03 75 0C			ADD		ESI, [EBP+12]
+ 00000309  4E				DEC		ESI
 
 					; To reverse the string, we will iterate through half the string
- 00000308  8B 45 0C			MOV		EAX, [EBP+12]
- 0000030B  BB 00000002			MOV		EBX, 2
- 00000310  99				CDQ
- 00000311  F7 F3			DIV		EBX
- 00000313  8B C8			MOV		ECX, EAX
- 00000315			_ReverseDigits:
+ 0000030A  8B 45 0C			MOV		EAX, [EBP+12]
+ 0000030D  BB 00000002			MOV		EBX, 2
+ 00000312  99				CDQ
+ 00000313  F7 F3			DIV		EBX
+ 00000315  8B C8			MOV		ECX, EAX
+ 00000317			_ReverseDigits:
 					; For each iteration, the first and last numbers are replaced
- 00000315  8A 07			MOV		BYTE PTR AL, [EDI]
- 00000317  8A 26			MOV		BYTE PTR AH, [ESI]
- 00000319  88 27			MOV		[EDI], BYTE PTR AH
- 0000031B  88 06			MOV		[ESI], BYTE PTR AL
+ 00000317  8A 07			MOV		BYTE PTR AL, [EDI]
+ 00000319  8A 26			MOV		BYTE PTR AH, [ESI]
+ 0000031B  88 27			MOV		[EDI], BYTE PTR AH
+ 0000031D  88 06			MOV		[ESI], BYTE PTR AL
 
 					; The front of the array (EDI) is then incremented by one
- 0000031D  47				INC		EDI
+ 0000031F  47				INC		EDI
 
 					; The back of the array (ESI) is then decremented by one
- 0000031E  4E				DEC		ESI
+ 00000320  4E				DEC		ESI
 
- 0000031F  E2 F4			LOOP	_ReverseDigits
+ 00000321  E2 F4			LOOP	_ReverseDigits
 					
- 00000321  61				POPAD
- 00000322  5D				POP		EBP
- 00000323  C2 0008			RET		8
- 00000326			ReverseString ENDP
+ 00000323  61				POPAD
+ 00000324  5D				POP		EBP
+ 00000325  C2 0008			RET		8
+ 00000328			ReverseString ENDP
 
 				; ---------------------------------------------------------------------
 				; Name: CalculateSum
@@ -890,32 +896,32 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
 				; Returns:
 				;		Sum total of the numbers entered by the user in sumTotal.
 				; ---------------------------------------------------------------------
- 00000326			CalculateSum PROC
- 00000326  55				PUSH	EBP
- 00000327  8B EC			MOV		EBP, ESP
- 00000329  60				PUSHAD
+ 00000328			CalculateSum PROC
+ 00000328  55				PUSH	EBP
+ 00000329  8B EC			MOV		EBP, ESP
+ 0000032B  60				PUSHAD
 
 					; Running sum will be stored in EAX, address of array in ESI
- 0000032A  B8 00000000			MOV		EAX, 0
- 0000032F  8B 75 0C			MOV		ESI, [EBP+12]
+ 0000032C  B8 00000000			MOV		EAX, 0
+ 00000331  8B 75 0C			MOV		ESI, [EBP+12]
 
 					; Length of validatedNums array will be used as loop counter
- 00000332  8B 4D 08			MOV		ECX, [EBP+8]
- 00000335			_AddNumberToSum:
+ 00000334  8B 4D 08			MOV		ECX, [EBP+8]
+ 00000337			_AddNumberToSum:
 					; Add current number to running total then go to next number
- 00000335  03 06			ADD		EAX, [ESI]
- 00000337  83 C6 04			ADD		ESI, 4
+ 00000337  03 06			ADD		EAX, [ESI]
+ 00000339  83 C6 04			ADD		ESI, 4
 
- 0000033A  E2 F9			LOOP	_AddNumberToSum
+ 0000033C  E2 F9			LOOP	_AddNumberToSum
 
 					; Store and return results
- 0000033C  8B 7D 10			MOV		EDI, [EBP+16]
- 0000033F  89 07			MOV		[EDI], EAX
+ 0000033E  8B 7D 10			MOV		EDI, [EBP+16]
+ 00000341  89 07			MOV		[EDI], EAX
 
- 00000341  61				POPAD
- 00000342  5D				POP		EBP
- 00000343  C2 000C			RET		12
- 00000346			CalculateSum ENDP
+ 00000343  61				POPAD
+ 00000344  5D				POP		EBP
+ 00000345  C2 000C			RET		12
+ 00000348			CalculateSum ENDP
 
 				; ---------------------------------------------------------------------
 				; Name: CalculateAverage
@@ -938,28 +944,28 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
 				; Returns:
 				;		Rounded average of the numbers entered by the user in numAvg.
 				; ---------------------------------------------------------------------
- 00000346			CalculateAverage PROC
- 00000346  55				PUSH	EBP
- 00000347  8B EC			MOV		EBP, ESP
- 00000349  60				PUSHAD
+ 00000348			CalculateAverage PROC
+ 00000348  55				PUSH	EBP
+ 00000349  8B EC			MOV		EBP, ESP
+ 0000034B  60				PUSHAD
 
 					; Obtain rounded average by dividing sum total by count of numbers
- 0000034A  8B 45 0C			MOV		EAX, [EBP+12]
- 0000034D  8B 5D 08			MOV		EBX, [EBP+8]
- 00000350  99				CDQ
- 00000351  F7 FB			IDIV	EBX
+ 0000034C  8B 45 0C			MOV		EAX, [EBP+12]
+ 0000034F  8B 5D 08			MOV		EBX, [EBP+8]
+ 00000352  99				CDQ
+ 00000353  F7 FB			IDIV	EBX
 
 					; Store and return results
- 00000353  8B 7D 10			MOV		EDI, [EBP+16]
- 00000356  89 07			MOV		[EDI], EAX
+ 00000355  8B 7D 10			MOV		EDI, [EBP+16]
+ 00000358  89 07			MOV		[EDI], EAX
 
- 00000358  61				POPAD
- 00000359  5D				POP		EBP
- 0000035A  C2 000C			RET		12
- 0000035D			CalculateAverage ENDP
+ 0000035A  61				POPAD
+ 0000035B  5D				POP		EBP
+ 0000035C  C2 000C			RET		12
+ 0000035F			CalculateAverage ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:55:38
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 08:01:37
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -1061,17 +1067,17 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000002BB Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000035D Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000002B9 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000035F Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-CalculateAverage . . . . . . . .	P Near	 00000346 _TEXT	Length= 00000017 Public STDCALL
-CalculateSum . . . . . . . . . .	P Near	 00000326 _TEXT	Length= 00000020 Public STDCALL
-  _AddNumberToSum  . . . . . . .	L Near	 00000335 _TEXT	
+CalculateAverage . . . . . . . .	P Near	 00000348 _TEXT	Length= 00000017 Public STDCALL
+CalculateSum . . . . . . . . . .	P Near	 00000328 _TEXT	Length= 00000020 Public STDCALL
+  _AddNumberToSum  . . . . . . .	L Near	 00000337 _TEXT	
 CloseFile  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 CloseHandle  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Clrscr . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -1139,8 +1145,8 @@ ReadVal  . . . . . . . . . . . .	P Near	 0000013D _TEXT	Length= 0000007A Public 
   _GetNumber . . . . . . . . . .	L Near	 00000142 _TEXT	
   _CheckNumberSize . . . . . . .	L Near	 00000185 _TEXT	
   _DoneReadingValue  . . . . . .	L Near	 000001B1 _TEXT	
-ReverseString  . . . . . . . . .	P Near	 000002FA _TEXT	Length= 0000002C Public STDCALL
-  _ReverseDigits . . . . . . . .	L Near	 00000315 _TEXT	
+ReverseString  . . . . . . . . .	P Near	 000002FC _TEXT	Length= 0000002C Public STDCALL
+  _ReverseDigits . . . . . . . .	L Near	 00000317 _TEXT	
 SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -1195,19 +1201,19 @@ WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteVal . . . . . . . . . . . .	P Near	 0000026D _TEXT	Length= 0000008D Public STDCALL
+WriteVal . . . . . . . . . . . .	P Near	 0000026D _TEXT	Length= 0000008F Public STDCALL
   numToWrite . . . . . . . . . .	DWord	 bp - 00000004
   stringLength . . . . . . . . .	Byte	 bp - 00000005
   numIsNegative  . . . . . . . .	Byte	 bp - 00000006
   _ConvertNumber . . . . . . . .	L Near	 00000293 _TEXT	
   _ConversionDone  . . . . . . .	L Near	 000002BC _TEXT	
-  _StringReadyToComplete . . . .	L Near	 000002CE _TEXT	
-  _DisplayNumber . . . . . . . .	L Near	 000002E9 _TEXT	
+  _StringReadyToComplete . . . .	L Near	 000002D0 _TEXT	
+  _DisplayNumber . . . . . . . .	L Near	 000002EB _TEXT	
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000013D Public STDCALL
   _GetValue  . . . . . . . . . .	L Near	 00000011 _TEXT	
   _WriteValue  . . . . . . . . .	L Near	 00000066 _TEXT	
-  _ShowNumber  . . . . . . . . .	L Near	 0000008C _TEXT	
+  _ShowNumber  . . . . . . . . .	L Near	 0000008B _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -1433,17 +1439,17 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bufferSize . . . . . . . . . . .	DWord	 00000283 _DATA	
+bufferSize . . . . . . . . . . .	DWord	 00000281 _DATA	
 buffer . . . . . . . . . . . . .	Byte	 00000271 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 errorMessage . . . . . . . . . .	Byte	 00000192 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-firstNumToShow . . . . . . . . .	DWord	 0000027F _DATA	
+firstNumToShow . . . . . . . . .	Word	 0000027F _DATA	
 goodbyeMessage . . . . . . . . .	Byte	 00000132 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 introMessage . . . . . . . . . .	Byte	 00000000 _DATA	
-isNumberValid  . . . . . . . . .	DWord	 00000287 _DATA	
+isNumberValid  . . . . . . . . .	DWord	 00000285 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -1451,14 +1457,14 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numAvg . . . . . . . . . . . . .	DWord	 000002B7 _DATA	
+numAvg . . . . . . . . . . . . .	DWord	 000002B5 _DATA	
 numberPrompt . . . . . . . . . .	Byte	 00000173 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 resultPrompt1  . . . . . . . . .	Byte	 00000202 _DATA	
 roundedAvgMsg  . . . . . . . . .	Byte	 00000243 _DATA	
 sumTotalMsg  . . . . . . . . . .	Byte	 00000221 _DATA	
-sumTotal . . . . . . . . . . . .	DWord	 000002B3 _DATA	
-validatedNums  . . . . . . . . .	DWord	 0000028B _DATA	
+sumTotal . . . . . . . . . . . .	DWord	 000002B1 _DATA	
+validatedNums  . . . . . . . . .	DWord	 00000289 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
