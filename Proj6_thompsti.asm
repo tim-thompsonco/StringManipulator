@@ -60,24 +60,23 @@ ENDM
 ; ---------------------------------------------------------------------
 ; Name: mDisplayString
 ;
-; Reads string of ASCII digits in buffer and then displays the string
-; to the console.
+; Reads string and then displays the string to console.
 ;
-; Preconditions:	outputBuffer is an address pointing to a BYTE array
-;					containing the string of ASCII digits to display.
+; Preconditions:	stringToRead is an address pointing to a BYTE array
+;					containing the string to display.
 ;
 ; Postconditions: None.
 ;
 ; Receives:
-;		outputBuffer = address of array containing string of digits.
+;		stringToRead = address of array containing string.
 ;
 ; Returns: None.
 ; ---------------------------------------------------------------------
-mDisplayString	MACRO outputBuffer:REQ
+mDisplayString	MACRO stringToRead:REQ
 	PUSH	EDX
 
 	; Display number
-	MOV		EDX, outputBuffer
+	MOV		EDX, stringToRead
 	CALL	WriteString
 
 	POP		EDX
@@ -111,8 +110,7 @@ ENDM
 main PROC
 
 	; Introduce program to user and display instructions
-	PUSH	OFFSET introMessage
-	CALL	ShowMessage
+	mDisplayString OFFSET introMessage
 
 	; Obtain values from user
 	MOV		ECX, NUMCOUNT
@@ -141,8 +139,7 @@ _GetValue:
 	LOOP	_GetValue
 
 	; Notify user that they have entered numbers which are about to be written
-	PUSH	OFFSET resultPrompt1
-	CALL	ShowMessage
+	mDisplayString OFFSET resultPrompt1
 	
 	; Write values to console
 	MOV		ECX, NUMCOUNT
@@ -180,8 +177,7 @@ _ShowNumber:
 	CALL	CalculateSum
 
 	; Display sum total message
-	PUSH	OFFSET sumTotalMsg
-	CALL	ShowMessage
+	mDisplayString OFFSET sumTotalMsg
 
 	; Display sum total of validated numbers
 	PUSH	sumTotal
@@ -196,8 +192,7 @@ _ShowNumber:
 	CALL	CalculateAverage
 
 	; Display rounded average message
-	PUSH	OFFSET roundedAvgMsg
-	CALL	ShowMessage
+	mDisplayString OFFSET roundedAvgMsg
 
 	; Display rounded average of validated numbers
 	PUSH	numAvg
@@ -206,32 +201,10 @@ _ShowNumber:
 	CALL	WriteVal
 
 	; Say goodbye to the user
-	PUSH	OFFSET goodbyeMessage
-	CALL	ShowMessage
+	mDisplayString OFFSET goodbyeMessage
 
 	Invoke	ExitProcess,0	; Exit to operating system
 main ENDP
-
-; ---------------------------------------------------------------------
-; Name: ShowMessage
-;
-; Displays a message to the console.
-;
-; Receives:
-;		[EBP+8] = address of message.
-; ---------------------------------------------------------------------
-ShowMessage	PROC
-	PUSH	EBP
-	MOV		EBP, ESP
-	PUSH	EDX
-
-	MOV		EDX, [EBP+8]
-	CALL	WriteString
-
-	POP		EDX
-	POP		EBP
-	RET		4
-ShowMessage ENDP
 
 ; ---------------------------------------------------------------------
 ; Name: ReadVal
@@ -296,8 +269,7 @@ _GetNumber:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_CheckNumberSize
-	PUSH		[EBP+24]
-	CALL		ShowMessage
+	mDisplayString [EBP+24]
 	JMP			_GetNumber
 
 _CheckNumberSize:
@@ -316,8 +288,7 @@ _CheckNumberSize:
 	MOV			AL, [ESI]
 	CMP			AL, 1
 	JZ			_DoneReadingValue
-	PUSH		[EBP+24]
-	CALL		ShowMessage
+	mDisplayString [EBP+24]
 	JMP			_GetNumber
 
 _DoneReadingValue:
