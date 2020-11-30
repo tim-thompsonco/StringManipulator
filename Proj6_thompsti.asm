@@ -101,6 +101,7 @@ ENDM
 	sumTotalMsg		BYTE	13,10,13,10,"The sum of these numbers is: ",0
 	roundedAvgMsg	BYTE	13,10,13,10,"The rounded average of these numbers is: ",0
 	buffer			BYTE	MAXBUFFERSIZE DUP(?)
+	firstNumToShow	DWORD	0
 	bufferSize		DWORD	0
 	isNumberValid	DWORD	0
 	validatedNums	SDWORD	NUMCOUNT DUP(?)
@@ -154,20 +155,21 @@ _WriteValue:
 	MOV		ESI, OFFSET validatedNums
 	ADD		ESI, EAX
 
-	; If value to write isn't first one to show, add spacing before number
+	; Set boolean firstNumToShow to 1 if first number to display, 0 if not
 	CMP		ECX, NUMCOUNT
-	JZ		_ShowNumber
-	MOV		AL, ','
-	CALL	WriteChar
-	MOV		AL, ' '
-	CALL	WriteChar
+	JNZ		_ShowNumber
+	MOV		DWORD PTR firstNumToShow, 1
 
 _ShowNumber:
 	; Write value to console
+	PUSH	firstNumToShow
 	PUSH	[ESI]
 	PUSH	OFFSET buffer
 	PUSH	OFFSET bufferSize
 	CALL	WriteVal
+
+	; Reset boolean firstNumToShow for later use
+	MOV		DWORD PTR firstNumToShow, 0
 
 	LOOP	_WriteValue
 
@@ -180,7 +182,11 @@ _ShowNumber:
 	; Display sum total message
 	mDisplayString OFFSET sumTotalMsg
 
+	; The sum and average will both be the first number to display
+	MOV		DWORD PTR firstNumToShow, 1
+
 	; Display sum total of validated numbers
+	PUSH	firstNumToShow
 	PUSH	sumTotal
 	PUSH	OFFSET buffer
 	PUSH	OFFSET bufferSize
@@ -196,6 +202,7 @@ _ShowNumber:
 	mDisplayString OFFSET roundedAvgMsg
 
 	; Display rounded average of validated numbers
+	PUSH	firstNumToShow
 	PUSH	numAvg
 	PUSH	OFFSET buffer
 	PUSH	OFFSET bufferSize
@@ -491,7 +498,9 @@ ValidateNumber ENDP
 ;
 ; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD.
 ;					Number is a SDWORD. All three identifiers are
-;					initialized and number is validated.
+;					initialized and number is validated. firstNumToShow
+;					is a DWORD containing a 1 if this is the first number
+;					to display to console, 0 if it is not the first.
 ;
 ; Postconditions:	Buffer contains reversed number as string of ASCII
 ;					digits. bufferSize contains length of number.
@@ -500,6 +509,7 @@ ValidateNumber ENDP
 ;		[EBP+8] = address of bufferSize for user input.
 ;		[EBP+12] = address of buffer for user input.
 ;		[EBP+16] = value of number.
+;		[EBP+20] = boolean value of firstNumToShow.
 ;
 ; Returns: None.
 ; ---------------------------------------------------------------------
@@ -549,6 +559,17 @@ _ConvertNumber:
 	INC		BYTE PTR stringLength
 
 _ConversionDone:
+	; Add formatting to end of string for display to console if not the first number
+	MOV		EAX, [EBP+20]
+	CMP		EAX, 1
+	JZ		_StringReadyToComplete
+	MOV		AL, ' '
+	STOSB
+	MOV		AL, ','
+	STOSB
+	ADD		BYTE PTR stringLength, 2
+
+_StringReadyToComplete:
 	; Add null terminator to end of string to complete it
 	MOV		AL, 0
 	STOSB
@@ -574,7 +595,7 @@ _DisplayNumber:
 	mDisplayString ESI
 
 	POPAD
-	RET		12
+	RET		16
 WriteVal ENDP
 
 ; ---------------------------------------------------------------------
