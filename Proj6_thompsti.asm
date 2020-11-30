@@ -262,7 +262,8 @@ main ENDP
 ReadVal PROC
 	PUSH		EBP
 	MOV			EBP, ESP
-	PUSHAD
+	PUSH		ESI
+	PUSH		EAX
 
 _GetNumber:
 	; Call macro to get and store number input by user
@@ -303,9 +304,10 @@ _CheckNumberSize:
 	JMP			_GetNumber
 
 _DoneReadingValue:
-	POPAD
-	POP		EBP
-	RET		36
+	POP			EAX
+	POP			ESI
+	POP			EBP
+	RET			36
 ReadVal ENDP
 
 ; ---------------------------------------------------------------------
