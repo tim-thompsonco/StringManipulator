@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 21:02:08
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:26:52
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -73,7 +73,8 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 21:02:08
 					CALL	ReadString
 
 					; Store size of user input
-					MOV		[inputBufferLength], EAX
+					MOV		EDI, inputBufferLength
+					MOV		[EDI], EAX
 
 					POPAD
 				ENDM
@@ -417,18 +418,16 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 21:02:08
  0000011C  8B EC			MOV			EBP, ESP
  0000011E  60				PUSHAD
 
-					; Get address of parameters to pass to macro
- 0000011F  8B 7D 08			MOV			EDI, [EBP+8]
-
- 00000122			_GetNumber:
+ 0000011F			_GetNumber:
 					; Call macro to get and store number input by user
-					mGetString	[EBP+16], [EBP+12], EDI, [EBP+40]
- 00000122  60		     1		PUSHAD
- 00000123  8B 55 10	     1		MOV		EDX, [EBP+16]
- 00000126  E8 00000000 E     1		CALL	WriteString
- 0000012B  8B 55 0C	     1		MOV		EDX, [EBP+12]
- 0000012E  8B 4D 28	     1		MOV		ECX, [EBP+40]
- 00000131  E8 00000000 E     1		CALL	ReadString
+					mGetString	[EBP+16], [EBP+12], [EBP+8], [EBP+40]
+ 0000011F  60		     1		PUSHAD
+ 00000120  8B 55 10	     1		MOV		EDX, [EBP+16]
+ 00000123  E8 00000000 E     1		CALL	WriteString
+ 00000128  8B 55 0C	     1		MOV		EDX, [EBP+12]
+ 0000012B  8B 4D 28	     1		MOV		ECX, [EBP+40]
+ 0000012E  E8 00000000 E     1		CALL	ReadString
+ 00000133  8B 7D 08	     1		MOV		EDI, [EBP+8]
  00000136  89 07	     1		MOV		[EDI], EAX
  00000138  61		     1		POPAD
 
@@ -449,7 +448,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 21:02:08
  00000151  8B 55 18	     1		MOV		EDX, [EBP+24]
  00000154  E8 00000000 E     1		CALL	WriteString
  00000159  5A		     1		POP		EDX
- 0000015A  EB C6			JMP			_GetNumber
+ 0000015A  EB C3			JMP			_GetNumber
 
  0000015C			_CheckNumberSize:
 					; Validate number to ensure it fits in the boundaries of a SDWORD
@@ -472,7 +471,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 21:02:08
  0000017D  8B 55 18	     1		MOV		EDX, [EBP+24]
  00000180  E8 00000000 E     1		CALL	WriteString
  00000185  5A		     1		POP		EDX
- 00000186  EB 9A			JMP			_GetNumber
+ 00000186  EB 97			JMP			_GetNumber
 
  00000188			_DoneReadingValue:
  00000188  61				POPAD
@@ -922,7 +921,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 21:02:08
  00000321			CalculateAverage ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/29/20 21:02:08
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 07:26:52
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -1099,7 +1098,7 @@ ReadKeyFlush . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ReadKey  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadString . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadVal  . . . . . . . . . . . .	P Near	 0000011B _TEXT	Length= 00000072 Public STDCALL
-  _GetNumber . . . . . . . . . .	L Near	 00000122 _TEXT	
+  _GetNumber . . . . . . . . . .	L Near	 0000011F _TEXT	
   _CheckNumberSize . . . . . . .	L Near	 0000015C _TEXT	
   _DoneReadingValue  . . . . . .	L Near	 00000188 _TEXT	
 ReverseString  . . . . . . . . .	P Near	 000002BE _TEXT	Length= 0000002C Public STDCALL

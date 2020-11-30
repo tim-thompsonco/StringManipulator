@@ -52,7 +52,8 @@ mGetString	MACRO prompt:REQ, inputBuffer:REQ, inputBufferLength:REQ, maxBufferSi
 	CALL	ReadString
 
 	; Store size of user input
-	MOV		[inputBufferLength], EAX
+	MOV		EDI, inputBufferLength
+	MOV		[EDI], EAX
 
 	POPAD
 ENDM
@@ -250,12 +251,9 @@ ReadVal PROC
 	MOV			EBP, ESP
 	PUSHAD
 
-	; Get address of parameters to pass to macro
-	MOV			EDI, [EBP+8]
-
 _GetNumber:
 	; Call macro to get and store number input by user
-	mGetString	[EBP+16], [EBP+12], EDI, [EBP+40]
+	mGetString	[EBP+16], [EBP+12], [EBP+8], [EBP+40]
 
 	; Validate user input to ensure it is not empty and is a number
 	PUSH		[EBP+20]
