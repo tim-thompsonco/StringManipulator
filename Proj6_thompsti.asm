@@ -736,7 +736,10 @@ CalculateSum ENDP
 CalculateAverage PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSHAD
+	PUSH	EAX
+	PUSH	EDX
+	PUSH	EBX
+	PUSH	EDI
 
 	; Obtain rounded average by dividing sum total by count of numbers
 	MOV		EAX, [EBP+12]
@@ -748,7 +751,10 @@ CalculateAverage PROC
 	MOV		EDI, [EBP+16]
 	MOV		[EDI], EAX
 
-	POPAD
+	POP		EDI
+	POP		EBX
+	POP		EDX
+	POP		EAX
 	POP		EBP
 	RET		12
 CalculateAverage ENDP

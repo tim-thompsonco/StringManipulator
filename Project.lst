@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 08:01:37
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 06:59:16
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -947,25 +947,31 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 08:01:37
  00000348			CalculateAverage PROC
  00000348  55				PUSH	EBP
  00000349  8B EC			MOV		EBP, ESP
- 0000034B  60				PUSHAD
+ 0000034B  50				PUSH	EAX
+ 0000034C  52				PUSH	EDX
+ 0000034D  53				PUSH	EBX
+ 0000034E  57				PUSH	EDI
 
 					; Obtain rounded average by dividing sum total by count of numbers
- 0000034C  8B 45 0C			MOV		EAX, [EBP+12]
- 0000034F  8B 5D 08			MOV		EBX, [EBP+8]
- 00000352  99				CDQ
- 00000353  F7 FB			IDIV	EBX
+ 0000034F  8B 45 0C			MOV		EAX, [EBP+12]
+ 00000352  8B 5D 08			MOV		EBX, [EBP+8]
+ 00000355  99				CDQ
+ 00000356  F7 FB			IDIV	EBX
 
 					; Store and return results
- 00000355  8B 7D 10			MOV		EDI, [EBP+16]
- 00000358  89 07			MOV		[EDI], EAX
+ 00000358  8B 7D 10			MOV		EDI, [EBP+16]
+ 0000035B  89 07			MOV		[EDI], EAX
 
- 0000035A  61				POPAD
- 0000035B  5D				POP		EBP
- 0000035C  C2 000C			RET		12
- 0000035F			CalculateAverage ENDP
+ 0000035D  5F				POP		EDI
+ 0000035E  5B				POP		EBX
+ 0000035F  5A				POP		EDX
+ 00000360  58				POP		EAX
+ 00000361  5D				POP		EBP
+ 00000362  C2 000C			RET		12
+ 00000365			CalculateAverage ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    11/30/20 08:01:37
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 06:59:16
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -1068,14 +1074,14 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000002B9 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000035F Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000365 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-CalculateAverage . . . . . . . .	P Near	 00000348 _TEXT	Length= 00000017 Public STDCALL
+CalculateAverage . . . . . . . .	P Near	 00000348 _TEXT	Length= 0000001D Public STDCALL
 CalculateSum . . . . . . . . . .	P Near	 00000328 _TEXT	Length= 00000020 Public STDCALL
   _AddNumberToSum  . . . . . . .	L Near	 00000337 _TEXT	
 CloseFile  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
