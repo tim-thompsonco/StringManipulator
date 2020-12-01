@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 06:59:16
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 07:03:10
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Page 1 - 1
 
 
@@ -367,7 +367,7 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 06:59:16
  000000F0  68 000002B5 R		PUSH	OFFSET numAvg
  000000F5  FF 35 000002B1 R		PUSH	sumTotal
  000000FB  6A 0A			PUSH	NUMCOUNT
- 000000FD  E8 00000246			CALL	CalculateAverage
+ 000000FD  E8 0000024C			CALL	CalculateAverage
 
 					; Display rounded average message
 					mDisplayString OFFSET roundedAvgMsg
@@ -899,29 +899,35 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 06:59:16
  00000328			CalculateSum PROC
  00000328  55				PUSH	EBP
  00000329  8B EC			MOV		EBP, ESP
- 0000032B  60				PUSHAD
+ 0000032B  50				PUSH	EAX
+ 0000032C  56				PUSH	ESI
+ 0000032D  51				PUSH	ECX
+ 0000032E  57				PUSH	EDI
 
 					; Running sum will be stored in EAX, address of array in ESI
- 0000032C  B8 00000000			MOV		EAX, 0
- 00000331  8B 75 0C			MOV		ESI, [EBP+12]
+ 0000032F  B8 00000000			MOV		EAX, 0
+ 00000334  8B 75 0C			MOV		ESI, [EBP+12]
 
 					; Length of validatedNums array will be used as loop counter
- 00000334  8B 4D 08			MOV		ECX, [EBP+8]
- 00000337			_AddNumberToSum:
+ 00000337  8B 4D 08			MOV		ECX, [EBP+8]
+ 0000033A			_AddNumberToSum:
 					; Add current number to running total then go to next number
- 00000337  03 06			ADD		EAX, [ESI]
- 00000339  83 C6 04			ADD		ESI, 4
+ 0000033A  03 06			ADD		EAX, [ESI]
+ 0000033C  83 C6 04			ADD		ESI, 4
 
- 0000033C  E2 F9			LOOP	_AddNumberToSum
+ 0000033F  E2 F9			LOOP	_AddNumberToSum
 
 					; Store and return results
- 0000033E  8B 7D 10			MOV		EDI, [EBP+16]
- 00000341  89 07			MOV		[EDI], EAX
+ 00000341  8B 7D 10			MOV		EDI, [EBP+16]
+ 00000344  89 07			MOV		[EDI], EAX
 
- 00000343  61				POPAD
- 00000344  5D				POP		EBP
- 00000345  C2 000C			RET		12
- 00000348			CalculateSum ENDP
+ 00000346  5F				POP		EDI
+ 00000347  59				POP		ECX
+ 00000348  5E				POP		ESI
+ 00000349  58				POP		EAX
+ 0000034A  5D				POP		EBP
+ 0000034B  C2 000C			RET		12
+ 0000034E			CalculateSum ENDP
 
 				; ---------------------------------------------------------------------
 				; Name: CalculateAverage
@@ -944,34 +950,34 @@ Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 06:59:16
 				; Returns:
 				;		Rounded average of the numbers entered by the user in numAvg.
 				; ---------------------------------------------------------------------
- 00000348			CalculateAverage PROC
- 00000348  55				PUSH	EBP
- 00000349  8B EC			MOV		EBP, ESP
- 0000034B  50				PUSH	EAX
- 0000034C  52				PUSH	EDX
- 0000034D  53				PUSH	EBX
- 0000034E  57				PUSH	EDI
+ 0000034E			CalculateAverage PROC
+ 0000034E  55				PUSH	EBP
+ 0000034F  8B EC			MOV		EBP, ESP
+ 00000351  50				PUSH	EAX
+ 00000352  52				PUSH	EDX
+ 00000353  53				PUSH	EBX
+ 00000354  57				PUSH	EDI
 
 					; Obtain rounded average by dividing sum total by count of numbers
- 0000034F  8B 45 0C			MOV		EAX, [EBP+12]
- 00000352  8B 5D 08			MOV		EBX, [EBP+8]
- 00000355  99				CDQ
- 00000356  F7 FB			IDIV	EBX
+ 00000355  8B 45 0C			MOV		EAX, [EBP+12]
+ 00000358  8B 5D 08			MOV		EBX, [EBP+8]
+ 0000035B  99				CDQ
+ 0000035C  F7 FB			IDIV	EBX
 
 					; Store and return results
- 00000358  8B 7D 10			MOV		EDI, [EBP+16]
- 0000035B  89 07			MOV		[EDI], EAX
+ 0000035E  8B 7D 10			MOV		EDI, [EBP+16]
+ 00000361  89 07			MOV		[EDI], EAX
 
- 0000035D  5F				POP		EDI
- 0000035E  5B				POP		EBX
- 0000035F  5A				POP		EDX
- 00000360  58				POP		EAX
- 00000361  5D				POP		EBP
- 00000362  C2 000C			RET		12
- 00000365			CalculateAverage ENDP
+ 00000363  5F				POP		EDI
+ 00000364  5B				POP		EBX
+ 00000365  5A				POP		EDX
+ 00000366  58				POP		EAX
+ 00000367  5D				POP		EBP
+ 00000368  C2 000C			RET		12
+ 0000036B			CalculateAverage ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 06:59:16
+Microsoft (R) Macro Assembler Version 14.27.29112.0	    12/01/20 07:03:10
 <Designing Low-Level I/O Procedures & Macros     (Proj6_thom  Symbols 2 - 1
 
 
@@ -1074,16 +1080,16 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000002B9 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000365 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000036B Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
 
                 N a m e                 Type     Value    Attr
 
-CalculateAverage . . . . . . . .	P Near	 00000348 _TEXT	Length= 0000001D Public STDCALL
-CalculateSum . . . . . . . . . .	P Near	 00000328 _TEXT	Length= 00000020 Public STDCALL
-  _AddNumberToSum  . . . . . . .	L Near	 00000337 _TEXT	
+CalculateAverage . . . . . . . .	P Near	 0000034E _TEXT	Length= 0000001D Public STDCALL
+CalculateSum . . . . . . . . . .	P Near	 00000328 _TEXT	Length= 00000026 Public STDCALL
+  _AddNumberToSum  . . . . . . .	L Near	 0000033A _TEXT	
 CloseFile  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 CloseHandle  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 Clrscr . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL

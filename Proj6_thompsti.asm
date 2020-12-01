@@ -688,7 +688,10 @@ ReverseString ENDP
 CalculateSum PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSHAD
+	PUSH	EAX
+	PUSH	ESI
+	PUSH	ECX
+	PUSH	EDI
 
 	; Running sum will be stored in EAX, address of array in ESI
 	MOV		EAX, 0
@@ -707,7 +710,10 @@ _AddNumberToSum:
 	MOV		EDI, [EBP+16]
 	MOV		[EDI], EAX
 
-	POPAD
+	POP		EDI
+	POP		ECX
+	POP		ESI
+	POP		EAX
 	POP		EBP
 	RET		12
 CalculateSum ENDP
