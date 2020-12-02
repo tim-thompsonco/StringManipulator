@@ -422,6 +422,10 @@ ValidateNumber PROC
 	MOV		ECX, [EBX]				; value of buffer size
 	MOV		ESI, [EBP+12]			; address of buffer
 
+	; Check buffer size first, if user entered more than 12 digits, the number cannot possibly be within min/max
+	CMP		ECX, 12
+	JG		_NumberInvalid
+
 	; Check first buffer character to see if it's a sign
 	MOV		EAX, [ESI]
 	CMP		AL, 43
