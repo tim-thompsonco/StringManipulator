@@ -1,7 +1,7 @@
 TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 
 ; Author: Tim Thompson
-; Last Modified: 11/30/20
+; Last Modified: 12/2/20
 ; OSU email address: thompsti@oregonstate.edu
 ; Course number/section:   CS271 Section 400
 ; Project Number:       6         Due Date: 12/6/20
@@ -9,9 +9,9 @@ TITLE Designing Low-Level I/O Procedures & Macros     (Proj6_thompsti.asm)
 ;				Each number is validated to ensure that it is small enough to fit inside a
 ;				32 bit register. Once the 10 raw numbers have been inputted and validated, a
 ;				list of the numbers that the user entered is displayed. The program will then
-;				compute the sum of the numbers, and their rounded average, and the results of
-;				these computations are then displayed to the user. Finally, a goodbye message
-;				is displayed.
+;				compute the sum of the numbers, and their average (rounded down to floor), and
+;				the results of these computations are then displayed to the user. Finally, a
+;				goodbye message is displayed.
 
 INCLUDE Irvine32.inc
 
@@ -24,7 +24,7 @@ INCLUDE Irvine32.inc
 ; Preconditions:	Prompt is initialized and is a BYTE array containing
 ;					the user prompt to display. inputBuffer is initialized
 ;					and is a BYTE array. inputBufferLength is initialized
-;					and is a DWORD. maxBufferSize is initialized and is
+;					and is a DWORD. maxBufferLength is initialized and is
 ;					a DWORD.
 ;
 ; Postconditions: None.
@@ -33,13 +33,13 @@ INCLUDE Irvine32.inc
 ;		prompt = address of user prompt to display.
 ;		inputBuffer = address of buffer array to store user input.
 ;		inputBufferLength = address of buffer size to store input length.
-;		maxBufferSize = value of max buffer size.
+;		maxBufferLength = value of max buffer size.
 ;
 ; Returns:
 ;		inputBuffer contains string of number entered by user.
 ;		inputBufferLength contains length of string entered by user.
 ; ---------------------------------------------------------------------
-mGetString	MACRO prompt:REQ, inputBuffer:REQ, inputBufferLength:REQ, maxBufferSize:REQ
+mGetString	MACRO prompt:REQ, inputBuffer:REQ, inputBufferLength:REQ, maxBufferLength:REQ
 	PUSH	EDX
 	PUSH	ECX
 	PUSH	EDI
@@ -51,7 +51,7 @@ mGetString	MACRO prompt:REQ, inputBuffer:REQ, inputBufferLength:REQ, maxBufferSi
 
 	; Store user input
 	MOV		EDX, inputBuffer
-	MOV		ECX, maxBufferSize
+	MOV		ECX, maxBufferLength
 	CALL	ReadString
 
 	; Store size of user input
@@ -82,7 +82,6 @@ ENDM
 mDisplayString	MACRO stringToRead:REQ
 	PUSH	EDX
 
-	; Display number
 	MOV		EDX, stringToRead
 	CALL	WriteString
 
@@ -118,104 +117,104 @@ ENDM
 main PROC
 
 	; Introduce program to user and display instructions
-	mDisplayString OFFSET introMessage
+	mDisplayString	OFFSET introMessage
 
-	; Obtain values from user
-	MOV		ECX, NUMCOUNT
+	; Begin obtaining values from user
+	MOV				ECX, NUMCOUNT
 _GetValue:
 	; Get first address of validatedNums that is empty to store number in
-	MOV		EAX, NUMCOUNT
-	MOV		EBX, ECX
-	SUB		EAX, EBX
-	MOV		EBX, 4
-	MUL		EBX
-	MOV		ESI, OFFSET validatedNums
-	ADD		ESI, EAX
+	MOV				EAX, NUMCOUNT
+	MOV				EBX, ECX
+	SUB				EAX, EBX
+	MOV				EBX, 4
+	MUL				EBX
+	MOV				ESI, OFFSET validatedNums
+	ADD				ESI, EAX
 
 	; Request signed integer number from user
-	PUSH	MAXBUFFERSIZE
-	PUSH	ESI
-	PUSH	MINVALIDVAL
-	PUSH	MAXVALIDVAL
-	PUSH	OFFSET errorMessage
-	PUSH	OFFSET isNumberValid
-	PUSH	OFFSET numberPrompt
-	PUSH	OFFSET buffer
-	PUSH	OFFSET bufferSize
-	CALL	ReadVal
+	PUSH			MAXBUFFERSIZE
+	PUSH			ESI
+	PUSH			MINVALIDVAL
+	PUSH			MAXVALIDVAL
+	PUSH			OFFSET errorMessage
+	PUSH			OFFSET isNumberValid
+	PUSH			OFFSET numberPrompt
+	PUSH			OFFSET buffer
+	PUSH			OFFSET bufferSize
+	CALL			ReadVal
 
-	LOOP	_GetValue
+	LOOP			_GetValue
 
 	; Notify user that they have entered numbers which are about to be written
-	mDisplayString OFFSET resultPrompt1
+	mDisplayString	OFFSET resultPrompt1
 	
-	; Write values to console
-	MOV		ECX, NUMCOUNT
+	; Begin writing values to console
+	MOV				ECX, NUMCOUNT
 _WriteValue:
 	; Get address of next number to write to console
-	MOV		EAX, NUMCOUNT
-	MOV		EBX, ECX
-	SUB		EAX, EBX
-	MOV		EBX, 4
-	MUL		EBX
-	MOV		ESI, OFFSET validatedNums
-	ADD		ESI, EAX
+	MOV				EAX, NUMCOUNT
+	MOV				EBX, ECX
+	SUB				EAX, EBX
+	MOV				EBX, 4
+	MUL				EBX
+	MOV				ESI, OFFSET validatedNums
+	ADD				ESI, EAX
 
 	; Set boolean firstNumToShow to 1 if first number to display, 0 if not
-	CMP		ECX, NUMCOUNT
-	JNZ		_ShowNumber
-	MOV		WORD PTR firstNumToShow, 1
+	CMP				ECX, NUMCOUNT
+	JNZ				_ShowNumber
+	MOV				WORD PTR firstNumToShow, 1
 
 _ShowNumber:
 	; Write value to console
-	PUSH	firstNumToShow
-	PUSH	[ESI]
-	PUSH	OFFSET buffer
-	PUSH	OFFSET bufferSize
-	CALL	WriteVal
+	PUSH			firstNumToShow
+	PUSH			[ESI]
+	PUSH			OFFSET buffer
+	PUSH			OFFSET bufferSize
+	CALL			WriteVal
 
 	; Reset boolean firstNumToShow for later use
-	MOV		WORD PTR firstNumToShow, 0
+	MOV				WORD PTR firstNumToShow, 0
 
-	LOOP	_WriteValue
+	LOOP			_WriteValue
 
 	; Calculate sum total of validated numbers
-	PUSH	OFFSET sumTotal
-	PUSH	OFFSET validatedNums
-	PUSH	NUMCOUNT
-	CALL	CalculateSum
+	PUSH			OFFSET sumTotal
+	PUSH			OFFSET validatedNums
+	PUSH			NUMCOUNT
+	CALL			CalculateSum
 
 	; Display sum total message
-	mDisplayString OFFSET sumTotalMsg
+	mDisplayString	OFFSET sumTotalMsg
 
 	; The sum and average will both be the first number to display
-	MOV		WORD PTR firstNumToShow, 1
+	MOV				WORD PTR firstNumToShow, 1
 
 	; Display sum total of validated numbers
-	PUSH	firstNumToShow
-	PUSH	sumTotal
-	PUSH	OFFSET buffer
-	PUSH	OFFSET bufferSize
-	CALL	WriteVal
+	PUSH			firstNumToShow
+	PUSH			sumTotal
+	PUSH			OFFSET buffer
+	PUSH			OFFSET bufferSize
+	CALL			WriteVal
 
-	; Calculate rounded average of validated numbers
-	PUSH	OFFSET numAvg
-	PUSH	sumTotal
-	PUSH	NUMCOUNT
-	CALL	CalculateAverage
+	; Calculate average (rounded down to floor) of validated numbers
+	PUSH			OFFSET numAvg
+	PUSH			sumTotal
+	PUSH			NUMCOUNT
+	CALL			CalculateAverage
 
 	; Display rounded average message
-	mDisplayString OFFSET roundedAvgMsg
+	mDisplayString	OFFSET roundedAvgMsg
 
 	; Display rounded average of validated numbers
-	PUSH	firstNumToShow
-	PUSH	numAvg
-	PUSH	OFFSET buffer
-	PUSH	OFFSET bufferSize
-	CALL	WriteVal
+	PUSH			firstNumToShow
+	PUSH			numAvg
+	PUSH			OFFSET buffer
+	PUSH			OFFSET bufferSize
+	CALL			WriteVal
 
 	; Say goodbye to the user
-	mDisplayString OFFSET goodbyeMessage
+	mDisplayString	OFFSET goodbyeMessage
 
 	Invoke	ExitProcess,0	; Exit to operating system
 main ENDP
@@ -226,8 +225,8 @@ main ENDP
 ; Obtain a signed integer number from the user, validate that it is a
 ; valid signed integer number which can fit in a 32 bit register, and
 ; then store the validated number in an array. The length of the string
-; entered by the user is stored in bufferSize. If the number is invalid
-; then another number is requested from the user, until a valid number
+; entered by the user is stored in buffer size. If the number is invalid
+; then another number is requested from the user until a valid number
 ; is provided.
 ;
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD.
@@ -243,7 +242,7 @@ main ENDP
 ; Postconditions:	isNumberValid contains a 1 if the number entered
 ;					by the user is valid, 0 if the number is invalid.
 ;					buffer is populated with string of number input by user.
-;					bufferSize is populated with length of user inputted number.
+;					bufferSize is populated with length of number input by user.
 ;
 ; Receives:
 ;		[EBP+8] = address of buffer size for user input.
@@ -260,54 +259,55 @@ main ENDP
 ;		validatedNums array contains number input by user.
 ; ---------------------------------------------------------------------
 ReadVal PROC
-	PUSH		EBP
-	MOV			EBP, ESP
-	PUSH		ESI
-	PUSH		EAX
+	PUSH			EBP
+	MOV				EBP, ESP
+	PUSH			ESI
+	PUSH			EAX
 
 _GetNumber:
-	; Call macro to get and store number input by user
-	mGetString	[EBP+16], [EBP+12], [EBP+8], [EBP+40]
+	; Get and store number input by user
+	mGetString		[EBP+16], [EBP+12], [EBP+8], [EBP+40]
 
 	; Validate user input to ensure it is not empty and is a number
-	PUSH		[EBP+20]
-	PUSH		[EBP+12]
-	PUSH		[EBP+8]
-	CALL		ValidateInput
+	PUSH			[EBP+20]
+	PUSH			[EBP+12]
+	PUSH			[EBP+8]
+	CALL			ValidateInput
 
 	; Check if user input is a number, and if not, display error message
 	; then prompt user to enter a number
-	MOV			ESI, [EBP+20]
-	MOV			AL, [ESI]
-	CMP			AL, 1
-	JZ			_CheckNumberSize
-	mDisplayString [EBP+24]
-	JMP			_GetNumber
+	MOV				ESI, [EBP+20]
+	MOV				AL, [ESI]
+	CMP				AL, 1
+	JZ				_CheckNumberSize
+	mDisplayString	[EBP+24]
+	JMP				_GetNumber
 
 _CheckNumberSize:
 	; Validate number to ensure it fits in the boundaries of a SDWORD
-	PUSH		[EBP+36]
-	PUSH		[EBP+32]
-	PUSH		[EBP+28]
-	PUSH		[EBP+20]
-	PUSH		[EBP+12]
-	PUSH		[EBP+8]
-	CALL		ValidateNumber
+	; If validation succeeds, the number is added to the validatedNums array
+	PUSH			[EBP+36]
+	PUSH			[EBP+32]
+	PUSH			[EBP+28]
+	PUSH			[EBP+20]
+	PUSH			[EBP+12]
+	PUSH			[EBP+8]
+	CALL			ValidateNumber
 
 	; Check if number is valid, and if not, display error message
 	; then prompt user to enter another number
-	MOV			ESI, [EBP+20]
-	MOV			AL, [ESI]
-	CMP			AL, 1
-	JZ			_DoneReadingValue
-	mDisplayString [EBP+24]
-	JMP			_GetNumber
+	MOV				ESI, [EBP+20]
+	MOV				AL, [ESI]
+	CMP				AL, 1
+	JZ				_DoneReadingValue
+	mDisplayString	[EBP+24]
+	JMP				_GetNumber
 
 _DoneReadingValue:
-	POP			EAX
-	POP			ESI
-	POP			EBP
-	RET			36
+	POP				EAX
+	POP				ESI
+	POP				EBP
+	RET				36
 ReadVal ENDP
 
 ; ---------------------------------------------------------------------
@@ -318,7 +318,7 @@ ReadVal ENDP
 ; not have non-numeric characters in it other than an optional leading sign.
 ;
 ; Preconditions:	Buffer is a BYTE array, buffer size is a DWORD, and
-;					isValid is a BYTE. Buffer contains the string input
+;					isNumberValid is a DWORD. Buffer contains the string input
 ;					by the user and buffer size contains the length of
 ;					the string input by the user.
 ;
@@ -327,10 +327,10 @@ ReadVal ENDP
 ; Receives:
 ;		[EBP+8] = address of buffer size for user input.
 ;		[EBP+12] = address of buffer for user input.
-;		[EBP+16] = address of boolean value isValid.
+;		[EBP+16] = address of boolean value isNumberValid.
 ;
 ; Returns:
-;		isValid as 1 if input is valid, 0 if input is invalid.
+;		isNumberValid as 1 if input is valid, 0 if input is invalid.
 ; ---------------------------------------------------------------------
 ValidateInput PROC
 	PUSH	EBP
@@ -340,11 +340,10 @@ ValidateInput PROC
 	PUSH	ESI
 	PUSH	EAX
 
-	; Store parameters for validation
 	MOV		EBX, [EBP+8]
-	MOV		ECX, [EBX]
-	MOV		ESI, [EBP+12]
-	MOV		EBX, [EBP+16]
+	MOV		ECX, [EBX]			; Value of buffer size will be used for loop
+	MOV		ESI, [EBP+12]		; Address of buffer
+	MOV		EBX, [EBP+16]		; Value of isNumberValid boolean
 
 	; Check if buffer is an empty string, and if so, validation is done
 	CMP		ECX, 0
@@ -400,7 +399,7 @@ ValidateInput ENDP
 ; 32 bit register.
 ;
 ; Preconditions:	Buffer is a BYTE array, bufferSize is a DWORD, and
-;					isValid is a BYTE. Max and min valid values are
+;					isNumberValid is a DWORD. Max and min valid values are
 ;					initialized to SDWORD upper and lower boundaries.
 ;					Buffer contains the string input by the user and
 ;					bufferSize contains the length of the string input
@@ -411,22 +410,22 @@ ValidateInput ENDP
 ; Receives:
 ;		[EBP+8] = address of buffer size for user input.
 ;		[EBP+12] = address of buffer for user input.
-;		[EBP+16] = address of boolean value isValid.
+;		[EBP+16] = address of boolean value isNumberValid.
 ;		[EBP+20] = value of max valid value for number.
 ;		[EBP+24] = value of min valid value for number.
 ;		[EBP+28] = address of array to store validated numbers.
 ;
 ; Returns:
-;		isValid as 1 if input is valid, 0 if input is invalid.
+;		isNumberValid as 1 if input is valid, 0 if input is invalid.
 ; ---------------------------------------------------------------------
 ValidateNumber PROC
 	LOCAL	numIsNegative:BYTE
 	MOV		numIsNegative, 0
 	PUSHAD
 
-	MOV		EBX, [EBP+8]			; address of buffer size
-	MOV		ECX, [EBX]				; value of buffer size
-	MOV		ESI, [EBP+12]			; address of buffer
+	MOV		EBX, [EBP+8]
+	MOV		ECX, [EBX]				; Value of buffer size
+	MOV		ESI, [EBP+12]			; Address of buffer
 
 	; Check buffer size first, if user entered more than 12 digits, the number cannot possibly be within min/max
 	CMP		ECX, 12
@@ -541,7 +540,6 @@ WriteVal PROC
 
 	MOV		EDI, [EBP+12]			; Buffer to store ASCII digits
 	MOV		EAX, [EBP+16]			; Value of number to be converted
-	CLD
 
 	; Store number in local variable since EAX/EDX will be used for division
 	MOV		numToWrite, EAX
@@ -553,6 +551,7 @@ WriteVal PROC
 	INC		BYTE PTR numIsNegative
 	MOV		numToWrite, EAX			; If negative, update numToWrite so value is positive
 
+	CLD
 _ConvertNumber:
 	; Strip off last digit using division and store in buffer
 	MOV		EAX, numToWrite
@@ -624,7 +623,8 @@ WriteVal ENDP
 ; Preconditions:	Buffer is a BYTE array and buffer size is a DWORD.
 ;					Buffer contains a string of ASCII digits which
 ;					represents a number. Buffer size contains the
-;					length of the string, which includes any sign.
+;					length of the string, which includes any sign and
+;					formatting.
 ;
 ; Postconditions: None.
 ;
@@ -638,11 +638,7 @@ WriteVal ENDP
 ReverseString PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSH	EDI
-	PUSH	ESI
-	PUSH	EAX
-	PUSH	EBX
-	PUSH	ECX
+	PUSHAD
 
 	; To reverse the string in place, we use the two pointer technique
 	MOV		EDI, [EBP+8]
@@ -673,11 +669,7 @@ _ReverseDigits:
 
 	LOOP	_ReverseDigits
 	
-	POP		ECX
-	POP		EBX
-	POP		EAX
-	POP		ESI
-	POP		EDI
+	POPAD
 	POP		EBP
 	RET		8
 ReverseString ENDP
@@ -739,8 +731,8 @@ CalculateSum ENDP
 ; ---------------------------------------------------------------------
 ; Name: CalculateAverage
 ;
-; Calculates the rounded average of the validated numbers entered by the
-; user.
+; Calculates the average (rounded down to floor) of the validated numbers
+; entered by the user.
 ;
 ; Preconditions:	sumTotal is a SDWORD and is populated with the sum
 ;					total of the validated numbers. The number count is
@@ -765,7 +757,7 @@ CalculateAverage PROC
 	PUSH	EBX
 	PUSH	EDI
 
-	; Obtain rounded average by dividing sum total by count of numbers
+	; Obtain average (rounded down to floor) by dividing sum total by count of numbers
 	MOV		EAX, [EBP+12]
 	MOV		EBX, [EBP+8]
 	CDQ
