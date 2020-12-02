@@ -335,7 +335,10 @@ ReadVal ENDP
 ValidateInput PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSHAD
+	PUSH	EBX
+	PUSH	ECX
+	PUSH	ESI
+	PUSH	EAX
 
 	; Store parameters for validation
 	MOV		EBX, [EBP+8]
@@ -381,7 +384,10 @@ _ValidationSuccess:
 	MOV		DWORD PTR [EBX], 1
 
 _ValidationDone:
-	POPAD
+	POP		EAX
+	POP		ESI
+	POP		ECX
+	POP		EBX
 	POP		EBP
 	RET		12
 ValidateInput ENDP
