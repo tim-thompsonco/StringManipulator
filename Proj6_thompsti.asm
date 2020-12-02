@@ -628,7 +628,11 @@ WriteVal ENDP
 ReverseString PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSHAD
+	PUSH	EDI
+	PUSH	ESI
+	PUSH	EAX
+	PUSH	EBX
+	PUSH	ECX
 
 	; To reverse the string in place, we use the two pointer technique
 	MOV		EDI, [EBP+8]
@@ -659,7 +663,11 @@ _ReverseDigits:
 
 	LOOP	_ReverseDigits
 	
-	POPAD
+	POP		ECX
+	POP		EBX
+	POP		EAX
+	POP		ESI
+	POP		EDI
 	POP		EBP
 	RET		8
 ReverseString ENDP
