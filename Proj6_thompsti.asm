@@ -422,10 +422,6 @@ ValidateNumber PROC
 	MOV		ECX, [EBX]				; value of buffer size
 	MOV		ESI, [EBP+12]			; address of buffer
 
-	; Check buffer size first, if it's greater than 12 characters, it cannot be within min/max
-	CMP		ECX, 12
-	JG		_NumberInvalid
-
 	; Check first buffer character to see if it's a sign
 	MOV		EAX, [ESI]
 	CMP		AL, 43
@@ -632,7 +628,11 @@ WriteVal ENDP
 ReverseString PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSHAD
+	PUSH	EDI
+	PUSH	ESI
+	PUSH	EAX
+	PUSH	EBX
+	PUSH	ECX
 
 	; To reverse the string in place, we use the two pointer technique
 	MOV		EDI, [EBP+8]
@@ -663,7 +663,12 @@ _ReverseDigits:
 
 	LOOP	_ReverseDigits
 	
-	POPAD
+	POP		ECX
+	POP		EBX
+	POP		EAX
+	POP		ESI
+	POP		EDI
+	POP		EBP
 	RET		8
 ReverseString ENDP
 
@@ -691,7 +696,10 @@ ReverseString ENDP
 CalculateSum PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSHAD
+	PUSH	EAX
+	PUSH	ESI
+	PUSH	ECX
+	PUSH	EDI
 
 	; Running sum will be stored in EAX, address of array in ESI
 	MOV		EAX, 0
@@ -710,7 +718,11 @@ _AddNumberToSum:
 	MOV		EDI, [EBP+16]
 	MOV		[EDI], EAX
 
-	POPAD
+	POP		EDI
+	POP		ECX
+	POP		ESI
+	POP		EAX
+	POP		EBP
 	RET		12
 CalculateSum ENDP
 
@@ -738,7 +750,10 @@ CalculateSum ENDP
 CalculateAverage PROC
 	PUSH	EBP
 	MOV		EBP, ESP
-	PUSHAD
+	PUSH	EAX
+	PUSH	EDX
+	PUSH	EBX
+	PUSH	EDI
 
 	; Obtain rounded average by dividing sum total by count of numbers
 	MOV		EAX, [EBP+12]
@@ -750,7 +765,11 @@ CalculateAverage PROC
 	MOV		EDI, [EBP+16]
 	MOV		[EDI], EAX
 
-	POPAD
+	POP		EDI
+	POP		EBX
+	POP		EDX
+	POP		EAX
+	POP		EBP
 	RET		12
 CalculateAverage ENDP
 
