@@ -14,41 +14,48 @@
 
 <ul>
   <li>Implement and test two macros for string processing. These macros may use Irvine’s ReadString to get input from the user, and WriteString procedures to display output.
-    mGetSring:</li>
-  <ul>
-    <li>Display a prompt (input parameter, by reference), then get the user’s keyboard input into a memory location (output parameter, by reference). You may also need to provide a count (input parameter, by value) for the length of input string you can accommodate and a provide a number of bytes read (output parameter, by reference) by the macro.</li>
-    <li>mDisplayString:  Print the string which is stored in a specified memory location (input parameter, by reference).</li>
-  </ul>
-  <li>Implement and test two procedures for signed integers which use string primitive instructions</li>
+    mGetSring:
     <ul>
-      <li>ReadVal:</li>
+      <li>Display a prompt (input parameter, by reference), then get the user’s keyboard input into a memory location (output parameter, by reference). You may also need to provide a count (input parameter, by value) for the length of input string you can accommodate and a provide a number of bytes read (output parameter, by reference) by the macro.</li>
+      <li>mDisplayString:  Print the string which is stored in a specified memory location (input parameter, by reference).</li>
+    </ul>
+  </li>
+  <li>Implement and test two procedures for signed integers which use string primitive instructions
+    <ul>
+      <li>ReadVal:
         <ol>
           <li>Invoke the mGetSring macro (see parameter requirements above) to get user input in the form of a string of digits.</li>
           <li>Convert (using string primitives) the string of ascii digits to its numeric value representation (SDWORD), validating the user’s input is a valid number (no letters, symbols, etc).</li>
           <li>Store this value in a memory variable (output parameter, by reference).</li>
         </ol>
-      <li>WriteVal:</li>
+      </li>
+      <li>WriteVal:
         <ol>
           <li>Convert a numeric SDWORD value (input parameter, by value) to a string of ascii digits.</li>
           <li>Invoke the mDisplayString macro to print the ascii representation of the SDWORD value to the output.</li>
         </ol>
+      </li>
     </ul>
-  <li>Write a test program (in main) which uses the ReadVal and WriteVal procedures above to:</li>
+  </li>
+  <li>Write a test program (in main) which uses the ReadVal and WriteVal procedures above to:
     <ol>
       <li>Get 10 valid integers from the user.</li>
       <li>Stores these numeric values in an array.</li>
       <li>Display the integers, their sum, and their average.</li>
     </ol>
+  </li>
+</ul>
     
 <h3>Program Requirements</h3>
 
 <ol>
-  <li>User’s numeric input must be validated the hard way:</li>
+  <li>User’s numeric input must be validated the hard way:
     <ul>
       <li>Read the user's input as a string and convert the string to numeric form.</li>
       <li>If the user enters non-digits other than something which will indicate sign (e.g. ‘+’ or ‘-‘), or the number is too large for 32-bit registers, an error message should be displayed and the number should be discarded.</li>
       <li>If the user enters nothing (empty input), display an error and re-prompt.</li>
     </ul>
+  </li>
   <li>ReadInt, ReadDec, WriteInt, and WriteDec are not allowed in this program.</li>
   <li>Conversion routines must appropriately use the LODSB and/or STOSB operators.</li>
   <li>All procedure parameters must be passed on the runtime stack. Strings must be passed by reference.</li>
@@ -70,3 +77,4 @@
   <li>Check the Course SyllabusPreview the document for late submission guidelines.</li>
   <li>Find the assembly language instruction syntax and help in the CS271 Instructions Guide.</li>
   <li>To create, assemble, run,  and modify your program, follow the instructions on the course Syllabus Page’s "Tools" tab.</li>
+</ol>
